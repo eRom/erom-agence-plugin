@@ -24,6 +24,12 @@ sont générées depuis lui par un transpileur déterministe.
 
 Repos : code → https://github.com/eRom/erom-agence-plugin · marketplace → https://github.com/eRom/erom-marketplace
 
+
+# Principe
+
+- Faire un transpileur **claude -> codex** déterministe : `scripts/codex-generator.ts`
+
+
 # Rules
 
 - Cette racine EST le monorepo de dev : versionnée (git) et publiée vers `erom-agence-plugin`.
