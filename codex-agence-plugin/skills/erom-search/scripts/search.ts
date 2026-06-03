@@ -290,38 +290,14 @@ function generateYaml(
 
   // --- Memories ---
   yaml += `memories:\n`;
-  yaml += `  description: "Décisions consolidées et synthèses d'étapes gravées dans le marbre par Claude."\n`;
-  yaml += `  results:\n`;
-  if (memories.length > 0) {
-    memories.forEach((item) => {
-      const encodedDev = `${HOME}/dev`.replace(/\//g, "-");
-      const absolutePath = `${HOME}/.claude/projects/${encodedDev}-${item.project}/memory/${item.file}`;
-      const displayPath = absolutePath.replace(HOME, "~");
-      const title = `${item.date} - ${item.file} - ${item.project}`;
-      yaml += `    - id: "#${globalId++}"\n`;
-      yaml += `      title: ${escapeYamlString(title)}\n`;
-      yaml += `      path: ${escapeYamlString(displayPath)}\n`;
-      yaml += `      snippet: ${formatYamlSnippet(item.fragment, "      ")}\n\n`;
-    });
-  } else {
-    yaml += `    []\n\n`;
-  }
-
+  yaml += `  description: "Décisions consolidées et synthèses d'étapes gravées dans le marbre par Gemini."\n`;
+  yaml += `  results: "Codex n'a pas accès pour le moment"\n\n`;
   // --- Sessions ---
   yaml += `sessions:\n`;
   yaml += `  description: "Fils de discussions complets et snippets extraits du chat historique."\n`;
-  yaml += `  results:\n`;
-  if (sessions.length > 0) {
-    sessions.forEach((s) => {
-      const title = `${s.date} - ${s.project.replace(HOME, "~")}`;
-      yaml += `    - id: "#${globalId++}"\n`;
-      yaml += `      title: ${escapeYamlString(title)}\n`;
-      yaml += `      session_id: ${escapeYamlString(s.session)}\n`;
-      yaml += `      snippet: ${formatYamlSnippet(s.snippet, "      ")}\n\n`;
-    });
-  } else {
-    yaml += `    []\n\n`;
-  }
+  yaml += `  results: "Codex n'a pas accès pour le moment"\n\n`;
+
+
 
   return yaml.trim();
 }

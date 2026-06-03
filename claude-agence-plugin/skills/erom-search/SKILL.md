@@ -34,4 +34,4 @@ Affiche directement la sortie YAML générée par le script dans un bloc de code
 ### 3. Exploiter les sources trouvées
 - **Wiki technique** (cortex.results) : Ouvre le fichier correspondant listé dans le champ `path` (ex: `~/.config/gerber-vault/wiki/...`).
 - **Mémoire projet** (memories.results) : Tu peux lire le fichier complet de mémoire dans le dossier du projet Claude Code indiqué dans le champ `path`.
-- **Historique de chat** (sessions.results) : Tu disposes de l'UUID complet de la session dans le champ `session_id` pour reprendre la conversation (ex: `claude -r <session_id>`).
+- **Historique de chat** (sessions.results) : Tu disposes de l'UUID complet de la session dans le champ `session_id` pour reprendre la conversation.
