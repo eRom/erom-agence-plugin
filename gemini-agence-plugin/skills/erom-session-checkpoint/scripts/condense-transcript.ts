@@ -37,7 +37,7 @@ function condenseResult(content: unknown): string {
   });
   const filtered = lines.join("\n");
   if (filtered.length <= INLINE_THRESHOLD) return filtered;
-  
+
   if (lines.length > RESULT_HEAD + RESULT_TAIL) {
     const head = lines.slice(0, RESULT_HEAD).join("\n");
     const tail = lines.slice(-RESULT_TAIL).join("\n");
@@ -50,10 +50,10 @@ function formatToolArgs(args: unknown): string {
   if (args == null || typeof args !== "object") return "";
   const parts: string[] = [];
   const entries = Object.entries(args as Record<string, unknown>);
-  
+
   for (const [key, val] of entries) {
     if (key === "toolAction" || key === "toolSummary") continue;
-    
+
     let formattedVal = "";
     if (key === "CodeContent" || key === "ArtifactMetadata") {
       const len = typeof val === "string" ? val.length : JSON.stringify(val ?? "").length;
@@ -87,7 +87,7 @@ export function condense(jsonl: string): string {
         .replace(/<ADDITIONAL_METADATA>[\s\S]*?<\/ADDITIONAL_METADATA>/g, "")
         .replace(/<USER_SETTINGS_CHANGE>[\s\S]*?<\/USER_SETTINGS_CHANGE>/g, "")
         .trim();
-      
+
       if (cleanContent) {
         out.push(`## USER\n\n${cleanContent}`);
       }
@@ -109,7 +109,7 @@ export function condense(jsonl: string): string {
           body += (body ? "\n\n" : "") + tools;
         }
       }
-      
+
       if (body.trim()) {
         out.push(`## ASSISTANT\n\n${body.trim()}`);
       }

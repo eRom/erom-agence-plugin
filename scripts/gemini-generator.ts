@@ -29,23 +29,6 @@ const COLOR_MAPPING: Record<string, string> = {
   orange: "#FFA500",
 };
 
-function replaceBetween(
-  text: string,
-  startMarker: string,
-  endMarker: string,
-  replacement: string,
-): string {
-  const startIdx = text.indexOf(startMarker);
-  if (startIdx === -1) return text;
-  const endIdx = text.indexOf(endMarker, startIdx + startMarker.length);
-  if (endIdx === -1) return text;
-  return (
-    text.substring(0, startIdx + startMarker.length) +
-    replacement +
-    text.substring(endIdx)
-  );
-}
-
 async function ensureDir(dir: string) {
   await mkdir(dir, { recursive: true });
 }
@@ -554,6 +537,9 @@ test("préfixe ## USER / ## ASSISTANT et ignore le JSON malformé", () => {
   expect(out).toContain("hello");
 });
 `;
+    }
+    return res;
+  });
   console.log("✅ Skills transpilés.");
 
   console.log("🎉 Génération complétée avec succès !");
