@@ -193,32 +193,6 @@ Appelle le subagent \`erom-scribe\` (outil de sous-agent Codex, agent \`erom-scr
   );
 }
 
-function transformSearchScript(content: string) {
-  const memoriesReplacement = `// --- Memories ---
-  yaml += \`memories:\\n\`;
-  yaml += \`  description: "Décisions consolidées et synthèses d'étapes gravées dans le marbre par Gemini."\\n\`;
-  yaml += \`  results: "Codex n'a pas accès pour le moment"\\n\\n\`;
-
-`;
-
-  const sessionsReplacement = `// --- Sessions ---
-  yaml += \`sessions:\\n\`;
-  yaml += \`  description: "Fils de discussions complets et snippets extraits du chat historique."\\n\`;
-  yaml += \`  results: "Codex n'a pas accès pour le moment"\\n\\n\`;
-
-`;
-
-  return transformText(content)
-    .replace(
-      /\/\/ --- Memories ---[\s\S]*?(?=\/\/ --- Sessions ---)/,
-      memoriesReplacement,
-    )
-    .replace(
-      /\n\s*\/\/ --- Sessions ---[\s\S]*?(?=\n\s*return yaml(?:\.trim\(\))?;)/,
-      `\n  ${sessionsReplacement}`,
-    );
-}
-
 function codexCondenseTranscriptScript() {
   return `#!/usr/bin/env bun
 // Condense un transcript Claude ou Codex (.jsonl) en markdown "dialogue pur".
@@ -582,12 +556,7 @@ export async function generateCodexPlugin(options: GenerateOptions = {}) {
       ) {
         return codexCondenseTranscriptScript();
       }
-      if (
-        filePath.includes("erom-search") &&
-        basename(filePath) === "search.ts"
-      ) {
-        return transformSearchScript(content);
-      }
+
       return basename(filePath) === "SKILL.md"
         ? transformSkill(content)
         : transformText(content);

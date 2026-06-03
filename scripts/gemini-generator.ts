@@ -554,42 +554,6 @@ test("préfixe ## USER / ## ASSISTANT et ignore le JSON malformé", () => {
   expect(out).toContain("hello");
 });
 `;
-    } else if (
-      filePath.includes("erom-search") &&
-      basename(filePath) === "search.ts"
-    ) {
-      let searchTrans = content;
-
-      const memoriesReplacement = `
-  yaml += \`memories:\\n\`;
-  yaml += \`  description: "Décisions consolidées et synthèses d'étapes gravées dans le marbre par Gemini."\\n\`;
-  yaml += \`  results: "Gemini n'a pas accès pour le moment"\\n\\n\`;
-
-  `;
-
-      const sessionsReplacement = `
-  yaml += \`sessions:\\n\`;
-  yaml += \`  description: "Fils de discussions complets et snippets extraits du chat historique."\\n\`;
-  yaml += \`  results: "Gemini n'a pas accès pour le moment"\\n\\n\`;
-
-  `;
-
-      searchTrans = replaceBetween(
-        searchTrans,
-        "// --- Memories ---",
-        "// --- Sessions ---",
-        memoriesReplacement,
-      );
-      searchTrans = replaceBetween(
-        searchTrans,
-        "// --- Sessions ---",
-        "return yaml.trim();",
-        sessionsReplacement,
-      );
-      res = searchTrans;
-    }
-    return res;
-  });
   console.log("✅ Skills transpilés.");
 
   console.log("🎉 Génération complétée avec succès !");
