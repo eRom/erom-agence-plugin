@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "erom-slack-mcp": {
+      "command": "bun",
+      "args": [
+        "run",
+        "${CASERNE_SLACK_MCP_SERVER}"
+      ],
+      "env": {
+        "SLACK_BOT_TOKEN": "${GEMINI_SLACK_BOT_TOKEN}"
+      }
+    },
+    "erom-cortex-mcp": {
+      "command": "bun",
+      "args": [
+        "run",
+        "${CASERNE_VAULT_MCP_SERVER}"
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/resolver.json",
+  "version": "2025.10",
+
+  "sets": {
+    "primitives": {
+      "description": "Palette brute OKLCH, typographie (Inter + JetBrains Mono), dimensions, animations, shadows, elevation - source shadcn-demo-vite",
+      "sources": [{ "$ref": "./primitives.tokens.json" }]
+    }
+  },
+
+  "modifiers": {
+    "colorScheme": {
+      "description": "Dark-first - gris chauds hue 24-30, le mode sombre est l'experience principale",
+      "contexts": {
+        "dark": [{ "$ref": "./semantic-dark.tokens.json" }],
+        "light": [{ "$ref": "./semantic-light.tokens.json" }]
+      },
+      "default": "dark"
+    }
+  },
+
+  "resolutionOrder": [
+    { "$ref": "#/sets/primitives" },
+    { "$ref": "#/modifiers/colorScheme" }
+  ]
+}

@@ -1,10 +1,9 @@
 # macOS
 .DS_Store
 
-# Variantes générées : publiées vers leurs mirrors GitHub, non versionnées dans le monorepo de dev
-/antigravity-agence-plugin/
+# Variante générée non encore distribuée (Codex : en attente d'aval).
+# gemini-agence-plugin/ EST versionné (install directe depuis le repo).
 /codex-agence-plugin/
-/gemini-agence-plugin/
 
 # Outillage / build (futur transpileur TS)
 node_modules/

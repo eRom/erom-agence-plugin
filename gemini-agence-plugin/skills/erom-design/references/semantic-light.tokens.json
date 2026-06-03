@@ -1,0 +1,65 @@
+{
+  "$schema": "https://designtokens.org/schemas/2025.10/format.json",
+
+  "color": {
+    "$type": "color",
+    "$description": "Light mode",
+
+    "background":              { "$value": "{neutral.light-bg}" },
+    "foreground":              { "$value": "{neutral.light-fg}" },
+    "card":                    { "$value": "{neutral.light-card}" },
+    "card-foreground":         { "$value": "{neutral.light-card-fg}" },
+    "card-border":             { "$value": "{neutral.light-card-border}" },
+    "popover":                 { "$value": "{neutral.light-popover}" },
+    "popover-foreground":      { "$value": "{neutral.light-popover-fg}" },
+    "popover-border":          { "$value": "{neutral.light-popover-border}" },
+    "primary":                 { "$value": "{brand.amber}" },
+    "primary-foreground":      { "$value": "{brand.amber-foreground}" },
+    "secondary":               { "$value": "{neutral.light-secondary}" },
+    "secondary-foreground":    { "$value": "{neutral.light-secondary-fg}" },
+    "muted":                   { "$value": "{neutral.light-muted}" },
+    "muted-foreground":        { "$value": "{neutral.light-muted-fg}" },
+    "accent":                  { "$value": "{neutral.light-accent}" },
+    "accent-foreground":       { "$value": "{neutral.light-accent-fg}" },
+    "destructive":             { "$value": "{destructive.default}" },
+    "destructive-foreground":  { "$value": "{destructive.foreground}" },
+    "border":                  { "$value": "{neutral.light-border}" },
+    "input":                   { "$value": "{neutral.light-input}" },
+    "ring":                    { "$value": "{brand.amber}" },
+
+    "sidebar":                    { "$value": "{neutral.light-sidebar}" },
+    "sidebar-foreground":         { "$value": "{neutral.light-sidebar-fg}" },
+    "sidebar-primary":            { "$value": "{brand.amber}" },
+    "sidebar-primary-foreground": { "$value": "{brand.amber-foreground}" },
+    "sidebar-accent":             { "$value": "{neutral.light-sidebar-accent}" },
+    "sidebar-accent-foreground":  { "$value": "{neutral.light-sidebar-accent-fg}" },
+    "sidebar-border":             { "$value": "{neutral.light-sidebar-border}" },
+    "sidebar-ring":               { "$value": "{brand.amber}" },
+
+    "chart-1": { "$value": "{chart.light.1}" },
+    "chart-2": { "$value": "{chart.light.2}" },
+    "chart-3": { "$value": "{chart.light.3}" },
+    "chart-4": { "$value": "{chart.light.4}" },
+    "chart-5": { "$value": "{chart.light.5}" }
+  },
+
+  "elevate": {
+    "$type": "color",
+    "1":              { "$value": "{elevate.light.1}" },
+    "2":              { "$value": "{elevate.light.2}" },
+    "button-outline": { "$value": "{elevate.light.button-outline}" },
+    "badge-outline":  { "$value": "{elevate.light.badge-outline}" }
+  },
+
+  "shadow": {
+    "$type": "shadow",
+    "2xs":     { "$value": "{shadow.light.2xs}" },
+    "xs":      { "$value": "{shadow.light.xs}" },
+    "sm":      { "$value": "{shadow.light.sm}" },
+    "default": { "$value": "{shadow.light.default}" },
+    "md":      { "$value": "{shadow.light.md}" },
+    "lg":      { "$value": "{shadow.light.lg}" },
+    "xl":      { "$value": "{shadow.light.xl}" },
+    "2xl":     { "$value": "{shadow.light.2xl}" }
+  }
+}
