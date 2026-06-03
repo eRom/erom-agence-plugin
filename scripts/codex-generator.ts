@@ -16,9 +16,9 @@ const CLAUDE_PLUGIN_DIR = "claude-agence-plugin";
 const CODEX_PLUGIN_DIR = "codex-agence-plugin";
 
 const MODEL_MAPPING: Record<string, string> = {
-  haiku: "gpt-5.1-mini",
-  sonnet: "gpt-5.1",
-  opus: "gpt-5.1",
+  haiku: "gpt-5.4-mini",
+  sonnet: "gpt-5.4",
+  opus: "gpt-5.5",
 };
 
 const CLAUDE_ONLY_SKILL_FIELDS = new Set([
@@ -39,7 +39,11 @@ async function ensureDir(dir: string) {
 function parseFrontmatter(content: string) {
   const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
   if (!match) {
-    return { fields: new Map<string, string>(), body: content, hasFrontmatter: false };
+    return {
+      fields: new Map<string, string>(),
+      body: content,
+      hasFrontmatter: false,
+    };
   }
 
   const fields = new Map<string, string>();
@@ -119,7 +123,9 @@ function transformAgent(content: string) {
   const rawModel = stripQuotes(fields.get("model")) || "sonnet";
   const mappedModel = MODEL_MAPPING[rawModel] || rawModel;
   const disallowedTools = fields.get("disallowedTools") || "";
-  const sandboxMode = /(^|,\s*)(Write|Edit|NotebookEdit)(\s*,|$)/.test(disallowedTools)
+  const sandboxMode = /(^|,\s*)(Write|Edit|NotebookEdit)(\s*,|$)/.test(
+    disallowedTools,
+  )
     ? "read-only"
     : "workspace-write";
 
@@ -195,7 +201,11 @@ async function copyIfExists(
   try {
     await copyRecursive(src, dest, transform);
   } catch (error) {
-    if (!(error instanceof Error) || !("code" in error) || error.code !== "ENOENT") {
+    if (
+      !(error instanceof Error) ||
+      !("code" in error) ||
+      error.code !== "ENOENT"
+    ) {
       throw error;
     }
   }
@@ -209,8 +219,14 @@ async function generateAgents(claudeDir: string, codexDir: string) {
   for (const file of await readdir(agentsSrcDir)) {
     if (extname(file) !== ".md") continue;
     const content = await readFile(join(agentsSrcDir, file), "utf-8");
-    const name = stripQuotes(parseFrontmatter(content).fields.get("name")) || basename(file, ".md");
-    await writeFile(join(agentsDestDir, `${name}.toml`), transformAgent(content), "utf-8");
+    const name =
+      stripQuotes(parseFrontmatter(content).fields.get("name")) ||
+      basename(file, ".md");
+    await writeFile(
+      join(agentsDestDir, `${name}.toml`),
+      transformAgent(content),
+      "utf-8",
+    );
   }
 }
 
@@ -237,13 +253,29 @@ export async function generateCodexPlugin(options: GenerateOptions = {}) {
 
   await generateAgents(claudeDir, codexDir);
 
-  await copyIfExists(join(claudeDir, "hooks"), join(codexDir, "hooks"), transformText);
-  await copyIfExists(join(claudeDir, "scripts"), join(codexDir, "scripts"), transformText);
-  await copyIfExists(join(claudeDir, "skills"), join(codexDir, "skills"), (content, filePath) => {
-    return basename(filePath) === "SKILL.md" ? transformSkill(content) : transformText(content);
-  });
+  await copyIfExists(
+    join(claudeDir, "hooks"),
+    join(codexDir, "hooks"),
+    transformText,
+  );
+  await copyIfExists(
+    join(claudeDir, "scripts"),
+    join(codexDir, "scripts"),
+    transformText,
+  );
+  await copyIfExists(
+    join(claudeDir, "skills"),
+    join(codexDir, "skills"),
+    (content, filePath) => {
+      return basename(filePath) === "SKILL.md"
+        ? transformSkill(content)
+        : transformText(content);
+    },
+  );
 
-  console.log(`Codex plugin generated in ${relative(rootDir, codexDir) || codexDir}`);
+  console.log(
+    `Codex plugin generated in ${relative(rootDir, codexDir) || codexDir}`,
+  );
 }
 
 if (import.meta.main) {
