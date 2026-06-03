@@ -1,0 +1,26 @@
+{
+  "skill_name": "erom-cortex",
+  "evals": [
+    {
+      "id": 1,
+      "name": "phase1-search",
+      "prompt": "Recherche dans le cortex au sujet de macOS et du keychain.",
+      "expected_output": "Phase 1 : liste numerotee propre des fiches candidates avec leur chemin, invite a choisir, AUCUNE reponse de fond, flag des doublons macos-native-integration(s).",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "phase2-read-path",
+      "prompt": "Dans le cortex, lis ces deux fiches et reponds a ma question. Question : comment les secrets API sont-ils stockes et proteges sur macOS dans api-key-manager ? Fiches a lire : ~/.config/gerber-vault/wiki/concepts/macos-native-integration.md et ~/.config/gerber-vault/wiki/concepts/agentic-authentication-and-sessions.md",
+      "expected_output": "Phase 2 : reponse synthetique ancree (Keychain Access Group 83KXFVSEGM, LocalAuthentication/Touch ID 15min), section Sources reprenant le champ sources frontmatter de chaque fiche. Pas de re-listing Phase 1.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "phase2-by-name",
+      "prompt": "Interroge le cortex : lis les fiches « api-key-manager » et « macos-native-integration » et explique-moi comment le CLI akm communique avec l'app principale.",
+      "expected_output": "Phase 2 avec resolution nom->fichier (Glob sous wiki/), reponse ancree (App Group SQLite partage, Keychain Access Group partage, binaire sandboxe vs non-sandboxe), section Sources.",
+      "files": []
+    }
+  ]
+}

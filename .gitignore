@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Variantes générées : publiées vers leurs mirrors GitHub, non versionnées dans le monorepo de dev
+/antigravity-agence-plugin/
+/codex-agence-plugin/
+/gemini-agence-plugin/
+
+# Outillage / build (futur transpileur TS)
+node_modules/
+dist/
+
+# Config Claude locale (la settings.json partagée reste versionnée)
+**/.claude/settings.local.json
+
+# Conception interne + outillage de mainteneur (non distribué au public)
+/docs/
+/.claude/commands/
