@@ -1,4 +1,11 @@
-import { copyFile, mkdir, readdir, readFile, stat, writeFile } from "fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  stat,
+  writeFile,
+} from "fs/promises";
 import { basename, dirname, extname, join } from "path";
 
 const CLAUDE_DIR = join(process.cwd(), "claude-agence-plugin");
@@ -22,19 +29,32 @@ const COLOR_MAPPING: Record<string, string> = {
   orange: "#FFA500",
 };
 
-function replaceBetween(text: string, startMarker: string, endMarker: string, replacement: string): string {
+function replaceBetween(
+  text: string,
+  startMarker: string,
+  endMarker: string,
+  replacement: string,
+): string {
   const startIdx = text.indexOf(startMarker);
   if (startIdx === -1) return text;
   const endIdx = text.indexOf(endMarker, startIdx + startMarker.length);
   if (endIdx === -1) return text;
-  return text.substring(0, startIdx + startMarker.length) + replacement + text.substring(endIdx);
+  return (
+    text.substring(0, startIdx + startMarker.length) +
+    replacement +
+    text.substring(endIdx)
+  );
 }
 
 async function ensureDir(dir: string) {
   await mkdir(dir, { recursive: true });
 }
 
-async function copyRecursive(src: string, dest: string, transform: (content: string, filePath: string) => string | Promise<string>) {
+async function copyRecursive(
+  src: string,
+  dest: string,
+  transform: (content: string, filePath: string) => string | Promise<string>,
+) {
   const stats = await stat(src);
   if (stats.isDirectory()) {
     await ensureDir(dest);
@@ -79,21 +99,25 @@ function transformAgent(content: string): string {
 
   // Construction du nouveau frontmatter
   const newFmLines: string[] = [];
-  
+
   if (fmData.description) {
     newFmLines.push(`description: ${fmData.description}`);
   }
-  
+
   newFmLines.push("mode: subagent");
 
   // Mapping du modèle
   const rawModel = fmData.model?.replace(/['"]/g, "");
-  const mappedModel = rawModel ? (MODEL_MAPPING[rawModel] || rawModel) : "google/gemini-3.5-flash";
+  const mappedModel = rawModel
+    ? MODEL_MAPPING[rawModel] || rawModel
+    : "google/gemini-3.5-flash";
   newFmLines.push(`model: ${mappedModel}`);
 
   // Mapping de la couleur
   const rawColor = fmData.color?.replace(/['"]/g, "");
-  const mappedColor = rawColor ? (COLOR_MAPPING[rawColor] || rawColor) : "#008B8B";
+  const mappedColor = rawColor
+    ? COLOR_MAPPING[rawColor] || rawColor
+    : "#008B8B";
   newFmLines.push(`color: "${mappedColor}"`);
 
   // Mapping des permissions à partir de disallowedTools
@@ -119,18 +143,18 @@ function transformText(text: string): string {
   res = res.replace(/CLAUDE_SLACK_BOT_TOKEN/g, "GEMINI_SLACK_BOT_TOKEN");
   res = res.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, "${GEMINI_PLUGIN_ROOT}");
   res = res.replace(/CLAUDE_PLUGIN_ROOT/g, "GEMINI_PLUGIN_ROOT");
-  
+
   // Remplacements de marqueurs de session si applicable
   res = res.replace(/CLAUDECODE=1/g, "ANTIGRAVITY_AGENT=1");
   res = res.replace(/CLAUDE_CODE_ENTRYPOINT/g, "ANTIGRAVITY_AGENT");
-  
+
   // Remplacement de CLAUDE.md par GEMINI.md
   res = res.replace(/CLAUDE\.md/g, "GEMINI.md");
   res = res.replace(/claude-md/g, "gemini-md");
-  
+
   // Remplacement du tiret cadratin en tiret simple (Rule 1)
   res = res.replace(/—/g, "-");
-  
+
   return res;
 }
 
@@ -157,7 +181,9 @@ function transformMcp(content: string): string {
 }
 
 async function main() {
-  console.log("🚀 Lancement de la génération automatique pour Gemini / Antigravity...");
+  console.log(
+    "🚀 Lancement de la génération automatique pour Gemini / Antigravity...",
+  );
   await ensureDir(GEMINI_DIR);
 
   // 1. Générer mcp_config.json à partir de .mcp.json
@@ -192,8 +218,14 @@ async function main() {
   await copyRecursive(hooksSrcDir, hooksDestDir, (content, filePath) => {
     let res = transformText(content);
     if (basename(filePath) === "caserne_session_start.test.sh") {
-      res = res.replace(/\| Claude \| U0EXAMPLE01 \|/g, "| Gemini | U0EXAMPLE03 |");
-      res = res.replace(/agent courant \*: \*claude/gi, "agent courant : gemini");
+      res = res.replace(
+        /\| Claude \| U0EXAMPLE01 \|/g,
+        "| Gemini | U0EXAMPLE03 |",
+      );
+      res = res.replace(
+        /agent courant \*: \*claude/gi,
+        "agent courant : gemini",
+      );
       res = res.replace(/U0EXAMPLE01/g, "U0EXAMPLE03");
     }
     return res;
@@ -205,7 +237,7 @@ async function main() {
   const scriptsDestDir = join(GEMINI_DIR, "scripts");
   await copyRecursive(scriptsSrcDir, scriptsDestDir, (content, filePath) => {
     if (basename(filePath) === "erom_agence.sh") {
-      return "#!/usr/bin/env bash\nexport EROM_AGENCE_AGENT=\"gemini\"\nprintf '%s\\n' \"$EROM_AGENCE_AGENT\"\n";
+      return '#!/usr/bin/env bash\nexport EROM_AGENCE_AGENT="gemini"\nprintf \'%s\\n\' "$EROM_AGENCE_AGENT"\n';
     }
     return transformText(content);
   });
@@ -235,32 +267,50 @@ async function main() {
         const fmEndIdx = res.indexOf("---", 3);
         if (fmEndIdx !== -1) {
           const delegationNotice = `\n\n> [!IMPORTANT]\n> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@${agentName}** via l'outil \`start_subagent\`. Ne l'exécute pas toi-même.`;
-          res = res.substring(0, fmEndIdx + 3) + delegationNotice + res.substring(fmEndIdx + 3);
+          res =
+            res.substring(0, fmEndIdx + 3) +
+            delegationNotice +
+            res.substring(fmEndIdx + 3);
         }
       }
     }
-    if (filePath.includes("erom-session-checkpoint") && basename(filePath) === "SKILL.md") {
+    if (
+      filePath.includes("erom-session-checkpoint") &&
+      basename(filePath) === "SKILL.md"
+    ) {
       // Bloc de script de résolution de session
-      const targetScript = 'DIR="$HOME/.claude/projects/$(pwd | sed \'s#[/.]#-#g\')"\nTRANSCRIPT="${CLAUDE_CODE_SESSION_ID:+$DIR/$CLAUDE_CODE_SESSION_ID.jsonl}"\n[ -f "$TRANSCRIPT" ] || TRANSCRIPT="$(ls -t "$DIR"/*.jsonl 2>/dev/null | head -1)"';
-      
-      const geminiScript = 'CONV_ID="$(echo "${ANTIGRAVITY_SOURCE_METADATA:-}" | grep -o \'"conversationId":"[^\"]*\' | cut -d\'"\' -f4)"\n[ -n "$CONV_ID" ] || CONV_ID="${ANTIGRAVITY_TRAJECTORY_ID:-}"\n\nDIR=""\nif [ -n "$CONV_ID" ]; then\n  for p in "$HOME/.gemini/antigravity-ide" "$HOME/.gemini/antigravity" "$HOME/.gemini/antigravity-cli"; do\n    if [ -d "$p/brain/$CONV_ID" ]; then\n      DIR="$p/brain/$CONV_ID/.system_generated/logs"\n      break\n    fi\n  done\nfi\n\nif [ -z "$DIR" ] || [ ! -d "$DIR" ]; then\n  # Fallback : recherche du transcript le plus récent parmi les 3 environnements\n  DIR="$(find "$HOME/.gemini/antigravity-ide/brain" "$HOME/.gemini/antigravity/brain" "$HOME/.gemini/antigravity-cli/brain" -name "transcript.jsonl" -type f 2>/dev/null | xargs ls -t 2>/dev/null | head -n 1 | xargs dirname 2>/dev/null || true)"\nfi\n\nTRANSCRIPT="${DIR:+$DIR/transcript.jsonl}"';
+      const targetScript =
+        'DIR="$HOME/.claude/projects/$(pwd | sed \'s#[/.]#-#g\')"\nTRANSCRIPT="${CLAUDE_CODE_SESSION_ID:+$DIR/$CLAUDE_CODE_SESSION_ID.jsonl}"\n[ -f "$TRANSCRIPT" ] || TRANSCRIPT="$(ls -t "$DIR"/*.jsonl 2>/dev/null | head -1)"';
+
+      const geminiScript =
+        'CONV_ID="$(echo "${ANTIGRAVITY_SOURCE_METADATA:-}" | grep -o \'"conversationId":"[^\"]*\' | cut -d\'"\' -f4)"\n[ -n "$CONV_ID" ] || CONV_ID="${ANTIGRAVITY_TRAJECTORY_ID:-}"\n\nDIR=""\nif [ -n "$CONV_ID" ]; then\n  for p in "$HOME/.gemini/antigravity-ide" "$HOME/.gemini/antigravity" "$HOME/.gemini/antigravity-cli"; do\n    if [ -d "$p/brain/$CONV_ID" ]; then\n      DIR="$p/brain/$CONV_ID/.system_generated/logs"\n      break\n    fi\n  done\nfi\n\nif [ -z "$DIR" ] || [ ! -d "$DIR" ]; then\n  # Fallback : recherche du transcript le plus récent parmi les 3 environnements\n  DIR="$(find "$HOME/.gemini/antigravity-ide/brain" "$HOME/.gemini/antigravity/brain" "$HOME/.gemini/antigravity-cli/brain" -name "transcript.jsonl" -type f 2>/dev/null | xargs ls -t 2>/dev/null | head -n 1 | xargs dirname 2>/dev/null || true)"\nfi\n\nTRANSCRIPT="${DIR:+$DIR/transcript.jsonl}"';
 
       res = res.replace(targetScript, geminiScript);
 
       // Ligne d'explication textuelle qui suit
-      const targetExpl = "Cible **déterministe** le transcript de cette session via `$CLAUDE_CODE_SESSION_ID` (exposé par Claude Code), avec repli sur le `.jsonl` le plus récent (`mtime`). À résoudre **dans le contexte principal** : lui seul porte le bon session id (le scribe est un subagent).";
-      const geminiExpl = "Cible **déterministe** le transcript de cette session via l'ID de conversation (exposé par les métadonnées d'Antigravity) en cherchant son dossier brain correspondant, avec repli sur le `transcript.jsonl` le plus récent de l'ensemble des environnements Gemini. À résoudre **dans le contexte principal** : lui seul porte le bon session id (le scribe est un subagent).";
+      const targetExpl =
+        "Cible **déterministe** le transcript de cette session via `$CLAUDE_CODE_SESSION_ID` (exposé par Claude Code), avec repli sur le `.jsonl` le plus récent (`mtime`). À résoudre **dans le contexte principal** : lui seul porte le bon session id (le scribe est un subagent).";
+      const geminiExpl =
+        "Cible **déterministe** le transcript de cette session via l'ID de conversation (exposé par les métadonnées d'Antigravity) en cherchant son dossier brain correspondant, avec repli sur le `transcript.jsonl` le plus récent de l'ensemble des environnements Gemini. À résoudre **dans le contexte principal** : lui seul porte le bon session id (le scribe est un subagent).";
       res = res.replace(targetExpl, geminiExpl);
 
       // Dispatch du scribe pour start_subagent
-      const targetDispatch = "Appelle le subagent `erom-scribe` (tool Agent, `subagent_type: erom-scribe`).";
-      const geminiDispatch = "Appelle le subagent `erom-scribe` (outil `start_subagent`).";
+      const targetDispatch =
+        "Appelle le subagent `erom-scribe` (tool Agent, `subagent_type: erom-scribe`).";
+      const geminiDispatch =
+        "Appelle le subagent `erom-scribe` (outil `start_subagent`).";
       res = res.replace(targetDispatch, geminiDispatch);
-    } else if (filePath.includes("erom-session-checkpoint") && basename(filePath) === "condense-transcript.ts") {
+    } else if (
+      filePath.includes("erom-session-checkpoint") &&
+      basename(filePath) === "condense-transcript.ts"
+    ) {
       // 1. Remplacer les constantes en haut
       let contentTrans = content;
-      contentTrans = contentTrans.replace("const RESULT_TAIL = 2;", "const RESULT_TAIL = 1;");
-      
+      contentTrans = contentTrans.replace(
+        "const RESULT_TAIL = 2;",
+        "const RESULT_TAIL = 1;",
+      );
+
       // 2. Supprimer la définition de Block (dead code)
       const targetBlockType = `type Block = {
   type: string;
@@ -297,7 +347,7 @@ async function main() {
   });
   const filtered = lines.join("\\n");
   if (filtered.length <= INLINE_THRESHOLD) return filtered;
-  
+
   if (lines.length > RESULT_HEAD + RESULT_TAIL) {
     const head = lines.slice(0, RESULT_HEAD).join("\\n");
     const tail = lines.slice(-RESULT_TAIL).join("\\n");
@@ -305,7 +355,10 @@ async function main() {
   }
   return \`\${truncate(filtered, INLINE_THRESHOLD)}\\n[result: \${filtered.length} c - tronqué]\`;
 }`;
-      contentTrans = contentTrans.replace(targetCondenseResult, geminiCondenseResult);
+      contentTrans = contentTrans.replace(
+        targetCondenseResult,
+        geminiCondenseResult,
+      );
 
       // 4. Injecter formatToolArgs et la nouvelle fonction condense
       const oldCode = `function renderBlock(block: Block): string | null {
@@ -359,10 +412,10 @@ export function condense(jsonl: string): string {
   if (args == null || typeof args !== "object") return "";
   const parts: string[] = [];
   const entries = Object.entries(args as Record<string, unknown>);
-  
+
   for (const [key, val] of entries) {
     if (key === "toolAction" || key === "toolSummary") continue;
-    
+
     let formattedVal = "";
     if (key === "CodeContent" || key === "ArtifactMetadata") {
       const len = typeof val === "string" ? val.length : JSON.stringify(val ?? "").length;
@@ -396,7 +449,7 @@ export function condense(jsonl: string): string {
         .replace(/<ADDITIONAL_METADATA>[\\s\\S]*?<\\/ADDITIONAL_METADATA>/g, "")
         .replace(/<USER_SETTINGS_CHANGE>[\\s\\S]*?<\\/USER_SETTINGS_CHANGE>/g, "")
         .trim();
-      
+
       if (cleanContent) {
         out.push(\`## USER\\n\\n\${cleanContent}\`);
       }
@@ -418,7 +471,7 @@ export function condense(jsonl: string): string {
           body += (body ? "\\n\\n" : "") + tools;
         }
       }
-      
+
       if (body.trim()) {
         out.push(\`## ASSISTANT\\n\\n\${body.trim()}\`);
       }
@@ -436,9 +489,15 @@ export function condense(jsonl: string): string {
 }`;
 
       contentTrans = contentTrans.replace(oldCode, newCode);
-      contentTrans = contentTrans.replace("// Condense un transcript Claude Code (.jsonl) en markdown \"dialogue pur\".", "// Condense un transcript Gemini / Antigravity (.jsonl) en markdown \"dialogue pur\".");
+      contentTrans = contentTrans.replace(
+        '// Condense un transcript Claude Code (.jsonl) en markdown "dialogue pur".',
+        '// Condense un transcript Gemini / Antigravity (.jsonl) en markdown "dialogue pur".',
+      );
       res = contentTrans;
-    } else if (filePath.includes("erom-session-checkpoint") && basename(filePath) === "condense-transcript.test.ts") {
+    } else if (
+      filePath.includes("erom-session-checkpoint") &&
+      basename(filePath) === "condense-transcript.test.ts"
+    ) {
       // Remplacement complet du fichier de test pour s'adapter au format JSONL Gemini et à nos nouvelles règles
       res = `import { test, expect } from "bun:test";
 import { condense } from "./condense-transcript";
@@ -495,16 +554,19 @@ test("préfixe ## USER / ## ASSISTANT et ignore le JSON malformé", () => {
   expect(out).toContain("hello");
 });
 `;
-    } else if (filePath.includes("erom-search") && basename(filePath) === "search.ts") {
+    } else if (
+      filePath.includes("erom-search") &&
+      basename(filePath) === "search.ts"
+    ) {
       let searchTrans = content;
-      
+
       const memoriesReplacement = `
   yaml += \`memories:\\n\`;
   yaml += \`  description: "Décisions consolidées et synthèses d'étapes gravées dans le marbre par Gemini."\\n\`;
   yaml += \`  results: "Gemini n'a pas accès pour le moment"\\n\\n\`;
 
   `;
-      
+
       const sessionsReplacement = `
   yaml += \`sessions:\\n\`;
   yaml += \`  description: "Fils de discussions complets et snippets extraits du chat historique."\\n\`;
@@ -512,8 +574,18 @@ test("préfixe ## USER / ## ASSISTANT et ignore le JSON malformé", () => {
 
   `;
 
-      searchTrans = replaceBetween(searchTrans, "// --- Memories ---", "// --- Sessions ---", memoriesReplacement);
-      searchTrans = replaceBetween(searchTrans, "// --- Sessions ---", "return yaml.trim();", sessionsReplacement);
+      searchTrans = replaceBetween(
+        searchTrans,
+        "// --- Memories ---",
+        "// --- Sessions ---",
+        memoriesReplacement,
+      );
+      searchTrans = replaceBetween(
+        searchTrans,
+        "// --- Sessions ---",
+        "return yaml.trim();",
+        sessionsReplacement,
+      );
       res = searchTrans;
     }
     return res;
