@@ -1,10 +1,6 @@
 # macOS
 .DS_Store
 
-# Variante générée non encore distribuée (Codex : en attente d'aval).
-# gemini-agence-plugin/ EST versionné (install directe depuis le repo).
-/codex-agence-plugin/
-
 # Outillage / build (futur transpileur TS)
 node_modules/
 dist/

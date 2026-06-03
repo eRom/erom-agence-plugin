@@ -1,0 +1,23 @@
+{
+  "name": "caserne",
+  "version": "2.7.0",
+  "description": "Cross-project orchestration helpers for AI coding agents.",
+  "interface": {
+    "displayName": "Caserne",
+    "shortDescription": "Agence IA sur Codex sessions.",
+    "longDescription": "",
+    "developerName": "Romain Ecarnot",
+    "category": "Productivity",
+    "capabilities": [
+      "Session continuity",
+      "Kanban mngt"
+    ],
+    "websiteURL": "https://github.com/eRom/erom-agence-plugin",
+    "defaultPrompt": [
+      ""
+    ],
+    "brandColor": "#FFAF5F"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
