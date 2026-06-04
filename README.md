@@ -31,7 +31,6 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 | --- | --- |
 | `erom-agence-onboarding` | Bootstrap d'un projet eRom : repo GitHub privé, Linear Project (team EAT), canal Slack privé, structure locale. |
 | `erom-cortex` | Interroge le cortex technique (`gerber-vault`) via le MCP `erom-cortex-mcp`, en deux phases : recherche → liste sélectionnable → lecture des fiches choisies → réponse ancrée + sources. |
-| `erom-design` | Design system (web/desktop/mobile) : dark-first, surfaces neutres, brand paramétrique, OKLCH, borders > shadows, Inter + JetBrains Mono. |
 | `erom-handoff` | Transfère le contexte de la session courante dans une issue Linear (projet Handoffs) pour le reprendre ailleurs. |
 | `erom-inbox` | Vue agrégée du projet courant : issues Linear actives + inbox Slack du canal projet. |
 | `erom-session-checkpoint` | Checkpoint manuel avant `/clear` : commit (si repo), handoff, et dispatch du scribe qui écrit le snapshot dans `_sessions_/`. |
