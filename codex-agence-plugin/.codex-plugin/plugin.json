@@ -1,6 +1,6 @@
 {
   "name": "caserne",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "Cross-project orchestration helpers for AI coding agents.",
   "interface": {
     "displayName": "Caserne",
