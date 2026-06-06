@@ -1,14 +1,14 @@
 ---
 name: erom-cortex
-description: "Interroge le cortex technique central de Romain (gerber-vault : fiches satellites + concepts) via le MCP erom-cortex-mcp, en deux phases pilotées - recherche → liste sélectionnable, puis lecture des fiches choisies → réponse ancrée + sources. Déclenche dès que Romain veut consulter SON cortex / vault / savoir technique : 'recherche dans le cortex', 'interroge le cortex', 'cherche dans le vault', 'que dit mon cortex sur X', '/erom-cortex', ou veut faire lire des fiches précises du vault. Ne pas déclencher pour une question technique générale sans référence au cortex."
+description: "Interroge le cortex technique central via le MCP erom-cortex-mcp, en deux phases pilotées - recherche → liste sélectionnable, puis lecture des fiches choisies → réponse ancrée + sources. Déclenche dès que Romain veut consulter SON cortex / vault / savoir technique : 'recherche dans le cortex', 'interroge le cortex', 'cherche dans le vault', 'que dit mon cortex sur X', '/erom-cortex', ou veut faire lire des fiches précises du vault. Ne pas déclencher pour une question technique générale sans référence au cortex."
 ---
 
 > [!IMPORTANT]
-> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@erom-quick** via l'outil `start_subagent`. Ne l'exécute pas toi-même.
+> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@erom-search** via l'outil `start_subagent`. Ne l'exécute pas toi-même.
 
 # erom-cortex
 
-Interroge le cortex technique de Romain (`gerber-vault`) et en restitue une réponse propre et ancrée. Tu tournes dans un **fork** : le JSON brut du MCP et le contenu des fiches restent chez toi, seul le distillat (liste ou réponse) repart vers la session appelante. C'est tout l'intérêt - garder le bruit hors du contexte principal.
+Interroge le cortex technique de Romain et en restitue une réponse propre et ancrée. Tu tournes dans un **fork** : le JSON brut du MCP et le contenu des fiches restent chez toi, seul le distillat (liste ou réponse) repart vers la session appelante. C'est tout l'intérêt - garder le bruit hors du contexte principal.
 
 ## Deux phases, une seule par appel
 
