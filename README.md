@@ -18,6 +18,7 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 | `erom-quick` | haiku | Agrégateur lecture seule pour les skills eRom. |
 | `erom-reader` | sonnet | Agrégateur lecture seule pour les skills eRom (inbox). |
 | `erom-scribe` | sonnet | Écrit le snapshot de reprise dans `_sessions_/` à partir d'un transcript condensé + l'état git. Dispatché par `erom-session-checkpoint`. |
+| `erom-search` | haiku | Recherche sur le wiki life et cortex. |
 
 ### Hooks
 
@@ -33,6 +34,7 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 | `erom-cortex` | Interroge le cortex technique (`gerber-vault`) via le MCP `erom-cortex-mcp`, en deux phases : recherche → liste sélectionnable → lecture des fiches choisies → réponse ancrée + sources. |
 | `erom-handoff` | Transfère le contexte de la session courante dans une issue Linear (projet Handoffs) pour le reprendre ailleurs. |
 | `erom-inbox` | Vue agrégée du projet courant : issues Linear actives + inbox Slack du canal projet. |
+| `erom-search` | Interroge le wiki life. Lecture des fiches choisies → réponse ancrée + sources. |
 | `erom-session-checkpoint` | Checkpoint manuel avant `/clear` : commit (si repo), handoff, et dispatch du scribe qui écrit le snapshot dans `_sessions_/`. |
 | `erom-session-continue` | Reprise de session après `/clear` : recharge le dernier snapshot `_sessions_/` et restaure le contexte git. |
 | `erom-session-end` | Cartographie de fin de session : persiste `_memory_/`. |
