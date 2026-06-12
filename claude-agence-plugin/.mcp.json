@@ -8,7 +8,7 @@
         "SLACK_BOT_TOKEN": "${CLAUDE_SLACK_BOT_TOKEN}"
       }
     },
-    "erom-cortex-mcp": {
+    "cortex-mcp": {
       "type": "stdio",
       "command": "bun",
       "args": ["run", "${CASERNE_VAULT_MCP_SERVER}"]

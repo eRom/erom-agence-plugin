@@ -10,7 +10,7 @@
         "SLACK_BOT_TOKEN": "${GEMINI_SLACK_BOT_TOKEN}"
       }
     },
-    "erom-cortex-mcp": {
+    "cortex-mcp": {
       "command": "bun",
       "args": [
         "run",

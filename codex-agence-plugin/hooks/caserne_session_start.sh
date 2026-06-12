@@ -29,7 +29,7 @@ echo ""
 cat "$CASERNE_FILE"
 
 # Contexte projet : IDs par-repo (Linear project + canal Slack) si on est dans un
-# projet eRom onboardé. Source : <repo>/_memory_/ONBOARD.md (écrit par erom-agence-onboarding).
+# projet eRom onboardé. Source : <repo>/_memory_/ONBOARD.md (écrit par onboarding).
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 project_file="${repo_root:+$repo_root/_memory_/ONBOARD.md}"
 if [ -n "$project_file" ] && [ -f "$project_file" ]; then

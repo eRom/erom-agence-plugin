@@ -258,7 +258,7 @@ async function main() {
       }
     }
     if (
-      filePath.includes("erom-session-checkpoint") &&
+      filePath.includes("session-checkpoint") &&
       basename(filePath) === "SKILL.md"
     ) {
       // Bloc de script de résolution de session
@@ -279,12 +279,12 @@ async function main() {
 
       // Dispatch du scribe pour start_subagent
       const targetDispatch =
-        "Appelle le subagent `erom-scribe` (tool Agent, `subagent_type: erom-scribe`).";
+        "Appelle le subagent `caserne-scribe` (tool Agent, `subagent_type: caserne-scribe`).";
       const geminiDispatch =
-        "Appelle le subagent `erom-scribe` (outil `start_subagent`).";
+        "Appelle le subagent `caserne-scribe` (outil `start_subagent`).";
       res = res.replace(targetDispatch, geminiDispatch);
     } else if (
-      filePath.includes("erom-session-checkpoint") &&
+      filePath.includes("session-checkpoint") &&
       basename(filePath) === "condense-transcript.ts"
     ) {
       // 1. Remplacer les constantes en haut
@@ -478,7 +478,7 @@ export function condense(jsonl: string): string {
       );
       res = contentTrans;
     } else if (
-      filePath.includes("erom-session-checkpoint") &&
+      filePath.includes("session-checkpoint") &&
       basename(filePath) === "condense-transcript.test.ts"
     ) {
       // Remplacement complet du fichier de test pour s'adapter au format JSONL Gemini et à nos nouvelles règles

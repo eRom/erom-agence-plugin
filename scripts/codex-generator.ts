@@ -172,7 +172,7 @@ function transformCheckpointSkill(content: string) {
   const codexSections = `## 5. Résolution du transcript
 
 \`\`\`bash
-SCRIPT="\${PLUGIN_ROOT:-}/skills/erom-session-checkpoint/scripts/condense-transcript.ts"
+SCRIPT="\${PLUGIN_ROOT:-}/skills/session-checkpoint/scripts/condense-transcript.ts"
 [ -f "$SCRIPT" ] || SCRIPT="<base dir de ce skill>/scripts/condense-transcript.ts"
 CODEX_HOME_DIR="\${CODEX_HOME:-$HOME/.codex}"
 TRANSCRIPT="$(bun "$SCRIPT" --print-codex-transcript --cwd "$(pwd -P)" --codex-home "$CODEX_HOME_DIR")"
@@ -183,7 +183,7 @@ Cible le transcript Codex local depuis \`$CODEX_HOME/sessions\` (défaut : \`~/.
 
 ## 6. Dispatch du scribe
 
-Appelle le subagent \`erom-scribe\` (outil de sous-agent Codex, agent \`erom-scribe\`). Passe-lui dans le prompt : le handoff-pointeurs, le path du transcript (étape 5), le path du script \`<base dir de ce skill>/scripts/condense-transcript.ts\`, le dossier \`_sessions_/\` cible, le timestamp \`YYYYMMDD-HH_MM\`, le slug. Il écrit le fichier et te renvoie \`path\` + \`next_step\`.
+Appelle le subagent \`caserne-scribe\` (outil de sous-agent Codex, agent \`caserne-scribe\`). Passe-lui dans le prompt : le handoff-pointeurs, le path du transcript (étape 5), le path du script \`<base dir de ce skill>/scripts/condense-transcript.ts\`, le dossier \`_sessions_/\` cible, le timestamp \`YYYYMMDD-HH_MM\`, le slug. Il écrit le fichier et te renvoie \`path\` + \`next_step\`.
 
 `;
 
@@ -545,13 +545,13 @@ export async function generateCodexPlugin(options: GenerateOptions = {}) {
     join(codexDir, "skills"),
     (content, filePath) => {
       if (
-        filePath.includes("erom-session-checkpoint") &&
+        filePath.includes("session-checkpoint") &&
         basename(filePath) === "SKILL.md"
       ) {
         return transformCheckpointSkill(content);
       }
       if (
-        filePath.includes("erom-session-checkpoint") &&
+        filePath.includes("session-checkpoint") &&
         basename(filePath) === "condense-transcript.ts"
       ) {
         return codexCondenseTranscriptScript();
