@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # caserne_session_start.sh - Hook SessionStart du plugin caserne.
-# Injecte l'identité de l'agent courant + le référentiel ~/.config/CASERNE.md
+# Injecte l'identité de l'agent courant + le référentiel ~/.config/caserne/CASERNE.md
 # (contexte agence) + le _memory_/ONBOARD.md du repo courant (contexte projet, si présent).
 # Tout le stdout est injecté comme contexte de session par Codex.
 set -euo pipefail
 
-CASERNE_FILE="$HOME/.config/CASERNE.md"
+CASERNE_FILE="$HOME/.config/caserne/CASERNE.md"
 
 # Rien à injecter si le référentiel n'existe pas : sortie propre.
 [ -f "$CASERNE_FILE" ] || exit 0

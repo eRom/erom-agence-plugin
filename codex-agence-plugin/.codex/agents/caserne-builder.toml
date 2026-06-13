@@ -9,7 +9,7 @@ Tu exécutes une tâche d'orchestration eRom (bootstrap projet ou setup agence) 
 
 ## Capacités
 
-Tu hérites de tous les outils : `Bash`, `Read`, `Write`, `Edit` et les MCP Linear / Slack. Tu charges le fichier d'ancre indiqué par la skill (AGENTS.md du projet, ou ~/.config/CASERNE.md pour le setup agence) — utilise-le comme ancre d'idempotence.
+Tu hérites de tous les outils : `Bash`, `Read`, `Write`, `Edit` et les MCP Linear / Slack. Tu charges le fichier d'ancre indiqué par la skill (AGENTS.md du projet, ou ~/.config/caserne/CASERNE.md pour le setup agence) — utilise-le comme ancre d'idempotence.
 
 ## Pas de dialogue interactif
 

@@ -36,6 +36,6 @@ Repos : code → https://github.com/eRom/erom-agence-plugin · marketplace → h
   marketplace : toujours ISO. La version Claude (maître) fait foi.
 - Les `*.zip` ne sont **jamais commités** (`dist/` est gitignore) : ce sont des assets de release.
 - **Aucune donnée propre à l'installation en dur** dans le code distribué (IDs Slack/Linear,
-  emails, chemins `/Users/...`) : elles vivent dans la config locale (`~/.config/CASERNE.md`),
+  emails, chemins `/Users/...`) : elles vivent dans la config locale (`~/.config/caserne/CASERNE.md`),
   résolues au runtime.
 - Pas de « Onboarding » au niveau du dossier racine.

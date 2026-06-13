@@ -16,7 +16,7 @@ Orchestre l'init d'un nouveau projet (peu importe où il vit sur disque - `~/dev
 - Un serveur MCP **Linear** actif et connecté au workspace eRom (team `EAT`)
 - Un serveur MCP **Slack** actif et connecté au workspace eRom
 - Pour l'étape RAG : un clone local du vault dans `~/.config/gerber-vault` (sinon l'étape se cloue/skip proprement)
-- `~/.config/CASERNE.md` doit exister **et être rempli** (IDs d'agence : team Linear, statuts, labels, channel). Sinon l'**étape 0** le bootstrappe depuis le template et rend la main. Les IDs sont injectés au démarrage (hook) ; à défaut `Read ~/.config/CASERNE.md`.
+- `~/.config/caserne/CASERNE.md` doit exister **et être rempli** (IDs d'agence : team Linear, statuts, labels, channel). Sinon l'**étape 0** le bootstrappe depuis le template et rend la main. Les IDs sont injectés au démarrage (hook) ; à défaut `Read ~/.config/caserne/CASERNE.md`.
 
 ## Portabilité cross-agents
 
@@ -28,25 +28,25 @@ Si l'utilisateur dit "dry-run", "simulation", "sans rien créer", ou "à blanc" 
 
 ## Workflow
 
-### 0. Pré-requis agence : `~/.config/CASERNE.md` (bloquant)
+### 0. Pré-requis agence : `~/.config/caserne/CASERNE.md` (bloquant)
 
-L'onboarding consomme les IDs d'agence (team Linear, statuts, labels, channel Slack) depuis `~/.config/CASERNE.md`. Pré-requis dur : sans lui, aucun lookup possible. Setup **déterministe à la main** - aucune discovery MCP, aucune génération automatique.
+L'onboarding consomme les IDs d'agence (team Linear, statuts, labels, channel Slack) depuis `~/.config/caserne/CASERNE.md`. Pré-requis dur : sans lui, aucun lookup possible. Setup **déterministe à la main** - aucune discovery MCP, aucune génération automatique.
 
 ```bash
-if [ ! -f "$HOME/.config/CASERNE.md" ]; then
-  mkdir -p "$HOME/.config"
-  cp "<base dir de ce skill>/references/CASERNE_TEMPLATE.md" "$HOME/.config/CASERNE.md"
+if [ ! -f "$HOME/.config/caserne/CASERNE.md" ]; then
+  mkdir -p "$HOME/.config/caserne"
+  cp "<base dir de ce skill>/references/CASERNE_TEMPLATE.md" "$HOME/.config/caserne/CASERNE.md"
 fi
 ```
 
 Puis **vérifie qu'il est rempli** : si le fichier vient d'être créé, ou si la team Linear est encore un placeholder (la ligne `- Team :` contient un `<...>`), **arrête-toi** sans rien faire d'autre et affiche :
 
 ```
-~/.config/CASERNE.md initialisé depuis le template (ou incomplet).
+~/.config/caserne/CASERNE.md initialisé depuis le template (ou incomplet).
 Remplis-le avec les IDs de ton agence (team Linear, statuts, labels, projet Handoffs, channel Slack, comptes agents), puis relance /erom-onboarding.
 ```
 
-L'agent est forké (pas de dialogue interactif) : il rend la main, l'utilisateur remplit le fichier, puis relance la skill (idempotente). Si `~/.config/CASERNE.md` existe **et** que la team Linear est renseignée → continue le workflow.
+L'agent est forké (pas de dialogue interactif) : il rend la main, l'utilisateur remplit le fichier, puis relance la skill (idempotente). Si `~/.config/caserne/CASERNE.md` existe **et** que la team Linear est renseignée → continue le workflow.
 
 ### 1. Déterminer le slug du projet
 

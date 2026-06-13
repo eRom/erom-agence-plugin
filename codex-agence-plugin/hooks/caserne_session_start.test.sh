@@ -6,8 +6,8 @@ here="$(cd "$(dirname "$0")" && pwd)"
 tmp_home="$(mktemp -d)"
 empty_home="$(mktemp -d)"
 trap 'rm -rf "$tmp_home" "$empty_home"' EXIT
-mkdir -p "$tmp_home/.config"
-cat > "$tmp_home/.config/CASERNE.md" <<'EOF'
+mkdir -p "$tmp_home/.config/caserne"
+cat > "$tmp_home/.config/caserne/CASERNE.md" <<'EOF'
 # CASERNE - test
 ## Agents
 | Agent  | Slack ID    | Linear ID | Email |

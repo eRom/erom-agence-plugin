@@ -32,7 +32,7 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 
 | Événement | Script | Rôle |
 | --- | --- | --- |
-| `SessionStart`, `PostCompact` | `caserne_session_start.sh` | Résout l'identité de l'agent courant et injecte le contenu de `~/.config/CASERNE.md` (bloc `<caserne-self>`) au démarrage et après chaque compaction. |
+| `SessionStart`, `PostCompact` | `caserne_session_start.sh` | Résout l'identité de l'agent courant et injecte le contenu de `~/.config/caserne/CASERNE.md` (bloc `<caserne-self>`) au démarrage et après chaque compaction. |
 
 ### Skills
 
@@ -62,7 +62,7 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 ### Prérequis
 
 - [Bun](https://bun.sh) - runtime des scripts et des serveurs MCP.
-- Un fichier `~/.config/CASERNE.md` décrivant l'identité de tes agents (IDs Slack/Linear, emails). Propre à ton installation, résolu au runtime.
+- Un fichier `~/.config/caserne/CASERNE.md` décrivant l'identité de tes agents (IDs Slack/Linear, emails). Propre à ton installation, résolu au runtime.
 - Variables d'environnement, selon les composants utilisés :
   - `CASERNE_SLACK_MCP_SERVER`, `CASERNE_VAULT_MCP_SERVER` - chemins des serveurs MCP.
   - `CASERNE_VAULT_PATH` - racine du vault (pour `cortex`).

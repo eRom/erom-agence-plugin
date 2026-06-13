@@ -1,4 +1,4 @@
-<!-- TEMPLATE caserne - copié vers ~/.config/CASERNE.md au premier onboarding.
+<!-- TEMPLATE caserne - copié vers ~/.config/caserne/CASERNE.md au premier onboarding.
      Remplis chaque placeholder <...> avec les IDs réels de ton agence, puis relance /erom-onboarding.
      Les noms par défaut (statuts, labels, projet, canal) sont pré-remplis : ajuste-les si besoin.
      Référentiel d'IDs stables de l'agence, injecté en contexte au démarrage (hook SessionStart).

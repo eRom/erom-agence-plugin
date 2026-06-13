@@ -39,7 +39,7 @@ Repos : code → https://github.com/eRom/erom-agence-plugin · marketplace → h
 - **Un seul numéro de version**, partagé par les 3 variantes (plugin.json) + les 2 entrées
   marketplace : toujours ISO. La version Claude (maître) fait foi.
 - **Aucune donnée propre à l'installation en dur** dans le code distribué (IDs Slack/Linear,
-  emails, chemins `/Users/...`) : elles vivent dans la config locale (`~/.config/CASERNE.md`),
+  emails, chemins `/Users/...`) : elles vivent dans la config locale (`~/.config/caserne/CASERNE.md`),
   résolues au runtime.
 - Pas de « Onboarding » au niveau du dossier racine.
 - Commit chirurgical seulement dans `codex-agence-plugin/` et `scripts/codex-generator.ts`.

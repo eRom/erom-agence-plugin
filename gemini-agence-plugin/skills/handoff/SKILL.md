@@ -11,7 +11,7 @@ Ce n'est pas un dump de transcript. C'est un `/teleport` curé : décisions pris
 
 ## Container (résolu depuis CASERNE.md)
 
-Les IDs d'agence vivent dans `CASERNE.md`, le référentiel injecté au démarrage de session (à défaut : `Read ~/.config/CASERNE.md`). **Au lancement, résous une fois ces rôles** depuis la section `## Linear` de CASERNE.md, puis réfère-les par nom dans les appels ci-dessous :
+Les IDs d'agence vivent dans `CASERNE.md`, le référentiel injecté au démarrage de session (à défaut : `Read ~/.config/caserne/CASERNE.md`). **Au lancement, résous une fois ces rôles** depuis la section `## Linear` de CASERNE.md, puis réfère-les par nom dans les appels ci-dessous :
 
 | Rôle | Où le lire dans CASERNE.md |
 |---|---|
