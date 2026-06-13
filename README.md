@@ -10,7 +10,7 @@
 
 > Helpers d'orchestration cross-projet et cross-agent pour les agents IA de codage.
 
-`caserne` mutualise, entre plusieurs agents IA, les briques d'orchestration d'un même studio : handoffs via Linear, accès Slack et RAG via serveurs MCP, onboarding de projet et reprise de session. Le plugin **Claude Code** est le maître ; les variantes **Codex** et **Antigravity/Gemini** en sont générées automatiquement. Distribué en open source - version actuelle : **2.7.0**.
+`caserne` mutualise, entre plusieurs agents IA, les briques d'orchestration d'un même studio : handoffs via Linear, accès Slack et RAG via serveurs MCP, onboarding de projet et reprise de session. Le plugin **Claude Code** est le maître ; les variantes **Codex** et **Antigravity/Gemini** en sont générées automatiquement. Distribué en open source - version actuelle : **2.7.2**.
 
 ---
 
