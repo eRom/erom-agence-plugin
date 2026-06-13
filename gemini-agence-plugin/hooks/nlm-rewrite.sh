@@ -21,6 +21,9 @@ if [[ ! "$CMD" =~ ^[[:space:]]*nlm[[:space:]]+notebook[[:space:]]+query([[:space
   [[ "$CMD" == *";"* ]] ||
   [[ "$CMD" == *"<"* ]] ||
   [[ "$CMD" == *">"* ]] ||
+  [[ "$CMD" == *'$'* ]] ||
+  [[ "$CMD" == *'`'* ]] ||
+  [[ "$CMD" == *'\'* ]] ||
   [[ "$CMD" == *$'\n'* ]]; then
   exit 0
 fi
