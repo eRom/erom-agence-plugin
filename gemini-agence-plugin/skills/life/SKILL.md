@@ -4,7 +4,7 @@ description: Répond à une question en naviguant le wiki de wiki-vault plutôt 
 ---
 
 > [!IMPORTANT]
-> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@erom-search** via l'outil `start_subagent`. Ne l'exécute pas toi-même.
+> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@caserne-search** via l'outil `start_subagent`. Ne l'exécute pas toi-même.
 
 # wiki-query
 

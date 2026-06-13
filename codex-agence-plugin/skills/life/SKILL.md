@@ -4,7 +4,7 @@ description: Répond à une question en naviguant le wiki de wiki-vault plutôt 
 ---
 
 > [!IMPORTANT]
-> Codex ne lance pas automatiquement cette skill dans un sous-agent depuis le frontmatter Claude. Si tu es l'agent principal, délègue l'exécution complète au sous-agent `erom-search`, puis synthétise uniquement son résultat final.
+> Codex ne lance pas automatiquement cette skill dans un sous-agent depuis le frontmatter Claude. Si tu es l'agent principal, délègue l'exécution complète au sous-agent `caserne-search`, puis synthétise uniquement son résultat final.
 
 # wiki-query
 

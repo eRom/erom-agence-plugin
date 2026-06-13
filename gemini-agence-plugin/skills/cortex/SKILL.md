@@ -4,7 +4,7 @@ description: "Interroge le cortex technique central via le MCP cortex-mcp, en de
 ---
 
 > [!IMPORTANT]
-> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@erom-search** via l'outil `start_subagent`. Ne l'exécute pas toi-même.
+> **Optimisation des ressources (modèle léger)** : Si tu es l'agent principal, tu DOIS déléguer l'intégralité de l'exécution de cette skill au sous-agent **@caserne-search** via l'outil `start_subagent`. Ne l'exécute pas toi-même.
 
 # cortex
 

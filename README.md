@@ -38,11 +38,12 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 
 | Skill | Rôle |
 | --- | --- |
-| `onboarding` | Bootstrap d'un projet eRom : repo GitHub privé, Linear Project (team EAT), canal Slack privé, structure locale. |
-| `cortex` | Interroge le cortex technique (`gerber-vault`) via le MCP `cortex-mcp`, en deux phases : recherche → liste sélectionnable → lecture des fiches choisies → réponse ancrée + sources. |
+| `cortex` | Interroge le cortex technique via le MCP `cortex-mcp`, en deux phases : recherche → liste sélectionnable → lecture des fiches choisies → réponse ancrée + sources. |
 | `handoff` | Transfère le contexte de la session courante dans une issue Linear (projet Handoffs) pour le reprendre ailleurs. |
 | `inbox` | Vue agrégée du projet courant : issues Linear actives + inbox Slack du canal projet. |
-| `caserne-search` | Interroge le wiki life. Lecture des fiches choisies → réponse ancrée + sources. |
+| `life` | Interroge le wiki life. Lecture des fiches choisies → réponse ancrée + sources. |
+| `notebooklm` | Utilise **NotebookLM** CLI (`nlm`) pour Deep Research et questionner les sources |
+| `onboarding` | Bootstrap d'un projet eRom : repo GitHub privé, Linear Project (team EAT), canal Slack privé, structure locale. |
 | `session-checkpoint` | Checkpoint manuel avant `/clear` : commit (si repo), handoff, et dispatch du scribe qui écrit le snapshot dans `_sessions_/`. |
 | `session-continue` | Reprise de session après `/clear` : recharge le dernier snapshot `_sessions_/` et restaure le contexte git. |
 | `session-end` | Cartographie de fin de session : persiste `_memory_/`. |
