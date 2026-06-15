@@ -44,6 +44,7 @@ Sous-agents internes, réservés au champ `agent:` des skills (pas d'invocation 
 | `life` | Interroge le wiki life. Lecture des fiches choisies → réponse ancrée + sources. |
 | `notebooklm` | Utilise **NotebookLM** CLI (`nlm`) pour Deep Research et questionner les sources |
 | `onboarding` | Bootstrap d'un projet eRom : repo GitHub privé, Linear Project (team EAT), canal Slack privé, structure locale. |
+| `pii-activate` | Active/désactive le masquage PII (IP, emails, chemins perso) à l'écran et vers l'IA, pour les partages d'écran/visio/stream. Les credentials restent TOUJOURS masqués, indépendamment de cette commande. |
 | `session-checkpoint` | Checkpoint manuel avant `/clear` : commit (si repo), handoff, et dispatch du scribe qui écrit le snapshot dans `_sessions_/`. |
 | `session-continue` | Reprise de session après `/clear` : recharge le dernier snapshot `_sessions_/` et restaure le contexte git. |
 | `session-end` | Cartographie de fin de session : persiste `_memory_/`. |
