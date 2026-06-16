@@ -1,7 +1,7 @@
 ---
-description: Active/désactive le masquage PII (IP, emails, chemins perso) à l'écran et vers l'IA, pour les partages d'écran/visio/stream. Les credentials restent TOUJOURS masqués, indépendamment de cette commande.
+description: "Active/désactive le masquage PII (IP, emails, chemins perso) à l'écran et vers l'IA, pour les partages d'écran/visio/stream. Les credentials restent TOUJOURS masqués, indépendamment de cette commande. Triggers : /pii-activate on | off, cache mes infos perso"
 user-invocable: true
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 Argument fourni : `$ARGUMENTS`  (par défaut `on`)
