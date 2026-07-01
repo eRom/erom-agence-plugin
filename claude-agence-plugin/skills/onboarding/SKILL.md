@@ -31,23 +31,16 @@ Si l'utilisateur dit "dry-run", "simulation", "sans rien créer", ou "à blanc" 
 
 ### 0. Pré-requis agence : `~/.config/caserne/CASERNE.md` (bloquant)
 
-L'onboarding consomme les IDs d'agence (team Linear, statuts, labels, channel Slack) depuis `~/.config/caserne/CASERNE.md`. Pré-requis dur : sans lui, aucun lookup possible. Setup **déterministe à la main** - aucune discovery MCP, aucune génération automatique.
+L'onboarding consomme les IDs d'agence (team Linear, statuts, labels, channel Slack) depuis `~/.config/caserne/CASERNE.md`. Pré-requis dur : sans lui, aucun lookup possible. 
 
-```bash
-if [ ! -f "$HOME/.config/caserne/CASERNE.md" ]; then
-  mkdir -p "$HOME/.config/caserne"
-  cp "<base dir de ce skill>/references/CASERNE_TEMPLATE.md" "$HOME/.config/caserne/CASERNE.md"
-fi
-```
-
-Puis **vérifie qu'il est rempli** : si le fichier vient d'être créé, ou si la team Linear est encore un placeholder (la ligne `- Team :` contient un `<...>`), **arrête-toi** sans rien faire d'autre et affiche :
+**Tu vérifies qu'il est rempli** : si le fichier vient d'être créé, ou si la team Linear est encore un placeholder (la ligne `- Team :` contient un `<...>`), **arrête-toi** sans rien faire d'autre et affiche :
 
 ```
-~/.config/caserne/CASERNE.md initialisé depuis le template (ou incomplet).
-Remplis-le avec les IDs de ton agence (team Linear, statuts, labels, projet Handoffs, channel Slack, comptes agents), puis relance /erom-onboarding.
+~/.config/caserne/CASERNE.md non trouvé ou incomplet !
+Remplis-le avec les IDs de ton agence (team Linear, statuts, labels, projet Handoffs, channel Slack, comptes agents), puis relance /onboarding.
 ```
 
-L'agent est forké (pas de dialogue interactif) : il rend la main, l'utilisateur remplit le fichier, puis relance la skill (idempotente). Si `~/.config/caserne/CASERNE.md` existe **et** que la team Linear est renseignée → continue le workflow.
+Si `~/.config/caserne/CASERNE.md` existe **et** que la team Linear est renseignée → continue le workflow.
 
 ### 1. Déterminer le slug du projet
 
