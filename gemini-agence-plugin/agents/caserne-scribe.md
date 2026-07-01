@@ -2,7 +2,7 @@
 description: Écrit le snapshot de reprise dans _sessions_/ à partir d'un transcript condensé + l'état git. Dispatché EXPLICITEMENT par le skill session-checkpoint uniquement - jamais auto-déclenché ni invoqué directement.
 mode: subagent
 model: google/gemini-3.5-flash
-color: "#800080"
+color: "#FFA500"
 permission:
   write_file: deny
   read_file: allow

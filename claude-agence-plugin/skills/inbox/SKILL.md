@@ -1,9 +1,8 @@
 ---
 name: inbox
-description: "Vue agrégée de ce qui demande attention sur le projet eRom courant : les issues Linear actives du projet + l'inbox Slack du canal projet. Lit l'identité projet (Linear Project ID + Channel Slack ID) depuis le bloc <caserne-project> injecté au démarrage (source : _memory_/ONBOARD.md). Déclenche dès que l'utilisateur veut faire le point sur le projet : 'inbox', 'ma boîte', 'quoi de neuf sur le projet', 'qu'est-ce qui m'attend', 'les issues en cours', 'où on en est', 'check le projet', 'messages en attente'."
+description: "Vue agrégée de ce qui demande attention sur le projet eRom courant : les issues Linear actives du projet + l'inbox Slack du canal projet. Lit l'identité projet (Linear Project ID + Channel Slack ID) depuis le fichier '_memory_/ONBOARD.md'. Déclenche dès que l'utilisateur veut faire le point sur le projet : 'inbox', 'ma boîte', 'quoi de neuf sur le projet', 'qu'est-ce qui m'attend', 'les issues en cours', 'où on en est', 'check le projet', 'messages en attente'."
 user-invocable: true
-context: fork
-agent: caserne-reader
+agent: caserne-mailbox
 ---
 
 # inbox
@@ -12,17 +11,17 @@ Vue « boîte de réception » du **projet courant** : ce qui bouge côté Linea
 
 ## Étape 0 - Identité du projet (obligatoire)
 
-L'identité du projet est servie au démarrage dans le bloc `<caserne-project>` (injecté par le hook SessionStart depuis `_memory_/ONBOARD.md`). Récupère-y deux valeurs dans le tableau :
+L'identité du projet est servie par le fichier `_memory_/ONBOARD.md`. Récupère-y deux valeurs dans le tableau :
 
 | Champ | Ligne du tableau |
 |---|---|
 | Linear Project ID | `| Linear Project | <uuid> (team EAT) |` |
 | Channel Slack ID | `| Slack | #<slug> (<Cxxxx>) |` |
 
-**Garde-fou** : si aucun bloc `<caserne-project>` n'est présent (projet pas encore onboardé, ou onboardé avant la migration vers `_memory_/ONBOARD.md`), arrête-toi et dis-le clairement :
+**Garde-fou** : si pas de fichier `_memory_/ONBOARD.md`, arrête-toi et dis-le clairement :
 ```
-Pas d'identité projet (<caserne-project> absent) - inbox indisponible.
-Lance /erom-onboarding pour (re)générer _memory_/ONBOARD.md.
+Pas d'identité projet - inbox indisponible.
+Lance /onboarding pour (re)générer _memory_/ONBOARD.md.
 ```
 Le Channel Slack ID, lui, est optionnel : s'il manque, fais la partie Linear et signale juste que le canal Slack n'est pas configuré.
 

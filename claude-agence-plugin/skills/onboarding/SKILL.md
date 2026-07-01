@@ -195,7 +195,7 @@ Enregistre le projet dans le **vault cortex** pour qu'il soit cloné (cron) puis
 
 ### 4. Écriture de `_memory_/ONBOARD.md`
 
-Les IDs par-projet vivent dans un fichier dédié, neutre et agnostique (lu par tous les agents via le hook SessionStart, qui l'injecte sous la balise `<caserne-project>`). Le dossier `_memory_/` a déjà été créé à l'étape 3.
+Les IDs par-projet vivent dans un fichier dédié, neutre et agnostique (lu par tous les agents). Le dossier `_memory_/` a déjà été créé à l'étape 3.
 
 **Écris `_memory_/ONBOARD.md`** avec ce contenu, en remplaçant les `<placeholders>` par les valeurs fraîches :
 
@@ -226,7 +226,7 @@ linear     : OK (reused)    → Project <linear_project_id>
 slack      : OK (created)   → #<slug> (<slack_channel_id>)
 structure  : OK             → _memory_/
 contexte   : OK (created)   → _memory_/ONBOARD.md
-rag        : OK (created)   → eRom/<slug> ajouté à gerber-vault/sources.yml
+rag-docs   : OK (created)   → eRom/<slug> ajouté à gerber-vault
 ```
 
 En mode `--dry-run`, préfixe chaque ligne par `[DRY-RUN]` et précise `would create` / `would reuse` / `would merge`.

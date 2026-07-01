@@ -27,7 +27,7 @@ Produis un bloc court (~15 lignes max) - le seul livrable de ton contexte cramé
 - `slug` : titre court kebab-case
 - `pointeurs` : 3-5 repères ("décision clé sur X vers la fin", "piège Y", "voir fichier Z")
 - `status` : in-progress | blocked | ready-to-ship
-- `linear` / `slack` : si projet erom (lus depuis le bloc `<caserne-project>` injecté au démarrage, source `_memory_/ONBOARD.md`), sinon `-`
+- `linear` / `slack` : si projet erom (lus depuis `_memory_/ONBOARD.md`), sinon `-`
 
 ## 4. Routage durable
 

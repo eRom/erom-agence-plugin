@@ -1,7 +1,7 @@
 ---
 name: caserne-scribe
 description: Écrit le snapshot de reprise dans _sessions_/ à partir d'un transcript condensé + l'état git. Dispatché EXPLICITEMENT par le skill session-checkpoint uniquement - jamais auto-déclenché ni invoqué directement.
-color: purple
+color: orange
 model: sonnet
 disallowedTools: NotebookEdit
 ---
