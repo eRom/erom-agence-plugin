@@ -1,0 +1,186 @@
+---
+name: agence-control
+description: "Manuel opératoire de l'agence eRom via le MCP Caserne : comment un agent IA agit au quotidien sous sa propre identité. Déclenche dès qu'il faut créer / mettre à jour / commenter / déléguer une issue Linear, lister issues ou projets (dont les tiennes via mine), chercher dans Slack, poster ou lire, consulter son inbox (file de triage) ou la vue projet, lister ses mentions, réagir ✅, ou lier un thread Slack à une issue. Couvre les 15 tools Caserne hors setup_project (voir erom-onboarding)."
+user-invocable: true
+---
+
+# Agence — opérer via le MCP Caserne
+
+Le MCP **Caserne** est le control plane de l'agence eRom : un serveur unique qui donne à chaque salarié IA sa **propre identité** sur Linear et Slack. Tu crées des issues, commentes, te vois déléguer du travail et postes dans Slack **sous ton propre nom**, sans partager de compte ni de token. Cette skill est le manuel des 15 tools. `setup_project` (bootstrap d'un projet) est traité à part dans `erom-onboarding`.
+
+Côté Claude, les tools s'appellent `mcp__caserne__<nom>` ; ici je les note `<nom>` (Caserne). Un autre harness (Codex, Gemini) les expose sous son propre préfixe — même sémantique.
+
+## Les 4 principes non négociables
+
+1. **Ton identité est fixée par le serveur, jamais par toi.** Elle vient de `CASERNE_AGENT_ID` (l'env dans lequel `caserne run` t'a lancé) et est résolue côté serveur. Ce n'est **jamais** un paramètre de tool, jamais falsifiable. Tout ce que tu crées ou postes sort sous l'identité de l'agent courant, point.
+
+2. **Des noms, jamais d'UUID.** Tu ne manipules plus aucun ID Linear/Slack :
+   - statuts et labels → par **nom** (`"Todo"`, `"SPEC OK"`) ;
+   - salariés et humains → par **clé** (`glm`, `romain`) pour `delegate` et les mentions ;
+   - projets → par **nom**.
+   Le serveur résout. Si un nom est invalide, l'erreur te **liste les valeurs valides** — lis-la, ne devine pas.
+
+3. **La source des noms valides, c'est `whoami`.** Statuts, labels, annuaire (clés), canaux, projet courant : tout est servi par `whoami`. Appelle-le **en début de session** et fie-toi à ce qu'il renvoie plutôt qu'à ta mémoire.
+
+4. **« Projet courant » = `_memory_/ONBOARD.md`.** La plupart des tools ciblent par défaut le projet Linear + le canal Slack de ce fichier. Pas d'`ONBOARD.md` dans le repo → précise `project` / `channel` explicitement, ou lance l'onboarding (`setup_project`).
+
+## Référence rapide
+
+| Tool | À quoi ça sert | Défauts / notes clés |
+|------|----------------|----------------------|
+| `whoami` | Identité + projet courant + référentiel (statuts, labels, annuaire, canaux) | À appeler en début de session |
+| `create_issue` | Crée une issue sous ton identité + **annonce Slack auto** | projet courant ; `state` défaut `Backlog` ; `notify:false` coupe l'annonce |
+| `update_issue` | Modifie statut / labels / titre / description / délégué | `id` = `EAT-12` |
+| `comment_issue` | Commente une issue sous ton identité | — |
+| `get_issue` | Lit une issue + description + commentaires | — |
+| `list_issues` | Liste les issues | projet courant ; `mine` = les tiennes, `active` = hors terminées ; `limit` défaut 50, max 100 |
+| `list_projects` | Liste les projets de la team | `query` = filtre sur le nom |
+| `post_message` | Poste dans Slack sous ton bot | canal projet → fallback `#caserne` ; `thread_ts` pour répondre |
+| `read_thread` | Lit un thread Slack complet | canal projet par défaut (sinon précise `channel`) |
+| `search_messages` | Cherche une chaîne dans l'historique des canaux projet | scope projet, pas Slack global ; `limit` défaut 20 |
+| `list_mentioned` | Tes derniers messages mentionnés (traités inclus) | canaux projet ; `limit` défaut 5, `handled` par item |
+| `get_inbox` | **Ta file de triage** : mentions non traitées + issues déléguées actives | scanne canal projet + `#caserne` ; boucle ✅ |
+| `inbox` | **Vue projet** : toutes les issues actives triées + tes derniers messages mentionnés | lecture seule ; `limit` = nb mentions |
+| `add_reaction` | Pose une réaction (défaut ✅ = traité) | canal projet par défaut (sinon précise `channel`) |
+| `link_slack_thread` | Attache un thread Slack (permalink) à une issue | — |
+
+## Linear
+
+### `create_issue`
+```
+create_issue({
+  title: "...",                 // requis
+  description?: "...",
+  state?: "Todo",               // NOM de statut, défaut "Backlog"
+  labels?: ["feature"],         // NOMS de labels
+  delegate?: "glm",             // CLÉ d'un salarié IA
+  project?: "mon-projet",       // NOM, défaut : projet courant
+  notify?: false                // coupe l'annonce Slack (défaut : annonce)
+})
+```
+Crée l'issue **sous ton identité**, dans le projet courant, et **annonce dans le canal Slack projet** (`🎫 <toi> a créé EAT-XX : <titre>`). L'annonce est silencieusement sautée s'il n'y a pas de canal. Retour : `{ issue, notify }`.
+
+### `update_issue`
+```
+update_issue({ id: "EAT-12", state?, labels?, title?, description?, delegate? })
+```
+`state` / `labels` par nom, `delegate` par clé. Ne passe que les champs à changer.
+
+### `comment_issue` · `get_issue`
+```
+comment_issue({ id: "EAT-12", body: "..." })   // commente sous ton identité
+get_issue({ id: "EAT-12" })                     // issue + description + commentaires
+```
+
+### `list_issues`
+```
+list_issues({ project?, state?, delegate?, query?, limit?, mine?, active? })
+```
+Projet courant par défaut. `state` par nom, `delegate` par clé, `query` = titre contient.
+- `mine: true` → **tes** issues (delegate = toi, résolu côté serveur ; pas besoin de connaître ta clé). Incompatible avec `delegate` (erreur si les deux).
+- `active: true` → exclut `Done` / `Canceled` / `Duplicate`.
+- **Tes issues actives** = `list_issues({ mine: true, active: true })`.
+
+### `list_projects`
+```
+list_projects({ query? })      // query = filtre (contains) sur le nom
+```
+
+## Slack
+
+### `post_message`
+```
+post_message({ text: "...", channel?: "Cxxxx", thread_ts?: "..." })
+```
+Poste sous **ton bot**. Canal par défaut : le canal projet, sinon `#caserne`. `thread_ts` pour répondre en fil. **Mentions par clé** : `@romain`, `@glm` sont résolues côté serveur en `<@Uxxxx>` (seules les clés exactes de l'annuaire, le reste passe littéral).
+
+### `read_thread`
+```
+read_thread({ thread_ts: "...", channel?: "Cxxxx" })
+```
+Thread complet (auteurs résolus en labels). Canal projet par défaut ; **sans projet courant, `channel` est obligatoire** (pas de fallback `#caserne` ici).
+
+### `search_messages`
+```
+search_messages({ query: "oauth", channels?: ["Cxxxx"], limit? })
+→ { matches: [{ channelId, ts, author, text }], skippedChannels }
+```
+Cherche `query` (**insensible à la casse**) dans l'historique des **canaux projet** (canal projet + `#caserne`), du plus récent au plus ancien. `limit` défaut 20. **Scope projet, pas Slack global** : le control plane n'a que des bot tokens, `search.messages` global exigerait un user token. Canal non membre → sauté (`skippedChannels`), pas fatal.
+
+### `list_mentioned`
+```
+list_mentioned({ channels?: ["Cxxxx"], limit? })
+→ { mentions: [{ channelId, ts, author, text, handled }], skippedChannels }
+```
+Tes **N derniers** messages te mentionnant (défaut 5), canaux projet, **traités inclus** (`handled: true` si déjà réagi ✅). C'est un **fil d'attention** (« qui m'a pingé récemment »), pas une file de triage. Pour la file à traiter, c'est `get_inbox`.
+
+### `get_inbox`
+```
+get_inbox({ channels?: ["Cxxxx"], limit? })
+→ { mentions, delegated, skippedChannels }
+```
+Ton inbox = **mentions Slack de toi non encore traitées** (sans réaction ✅/☑️) + **issues Linear actives qui te sont déléguées**. Scanne par défaut le canal projet + `#caserne`. Boucle de traitement : `get_inbox` → tu traites → `add_reaction` (✅) sur le message → il disparaît de l'inbox.
+
+**Deux limites à connaître :**
+- **Pas de « mentions Linear ».** Le volet Linear de l'inbox = **délégations uniquement**. Un tag dans un commentaire Linear ne remonte nulle part de façon transverse ; pour le voir, lis l'issue concernée (`get_issue`).
+- **Canaux non membres = ignorés, pas fatals.** Un canal où ton bot n'est pas invité est **sauté** (plus de crash de tout l'inbox) et listé dans `skippedChannels` (`{ channelId, reason: "not_in_channel" }`). Pour y voir tes mentions, fais-toi `/invite` dans le canal. Les canaux créés par `setup_project` t'ont déjà comme membre.
+
+### `inbox`
+```
+inbox({ limit? })
+→ { project, issues, mentions, skippedChannels }
+```
+**Vue d'ensemble du projet courant**, lecture seule. Deux volets :
+- `issues` = **toutes** les issues actives du projet (pas que les tiennes), hors `Done/Canceled/Duplicate`, **triées par avancement** (`Implementation` → `Specification` → `Todo` → `Backlog`).
+- `mentions` = tes derniers messages mentionnés (`limit` défaut 5, cf. `list_mentioned`).
+
+**Garde-fou** : sans projet courant (`ONBOARD.md`), erreur explicite → lance `setup_project`.
+
+**`inbox` vs `get_inbox` — ne pas confondre :**
+
+| | `get_inbox` | `inbox` |
+|---|---|---|
+| Angle | **ta file de triage perso** | **état du projet** |
+| Issues | celles **déléguées à toi** (actives) | **toutes** celles du projet (actives) |
+| Mentions | **non traitées** (sans ✅) | tes **N derniers** messages (traités inclus) |
+| Usage | boucle traiter → ✅ → disparaît | consulter « où on en est » |
+
+### `add_reaction`
+```
+add_reaction({ ts: "...", channel?: "Cxxxx", emoji?: "white_check_mark" })
+```
+Défaut ✅ (`white_check_mark`) = « traité ». Idempotent (une réaction déjà posée n'échoue pas). Canal projet par défaut ; sinon précise `channel`.
+
+### `link_slack_thread`
+```
+link_slack_thread({ issue_id: "EAT-12", thread_ts: "...", channel?: "Cxxxx" })
+```
+Attache le permalink du thread à l'issue Linear (attachment visible sur l'issue).
+
+## Cycle typique
+
+```
+whoami                                            // identité + projet + référentiel
+create_issue({ title: "Bug dédup chunks",
+               labels: ["bug"], state: "Todo" })   // → EAT-151, annoncé dans #projet
+post_message({ text: "@romain je prends EAT-151",
+               thread_ts })                         // sous ton bot, mention résolue
+update_issue({ id: "EAT-151", state: "Done" })
+add_reaction({ ts })                                // ✅ : mention traitée
+```
+
+## Erreurs fréquentes
+
+| Erreur | Cause | Correction |
+|--------|-------|------------|
+| `Statut "X" inconnu. Statuts : ...` | statut/label par valeur inexistante | reprends un **nom** de la liste renvoyée (ou de `whoami`) |
+| `Délégué "X" inconnu. Salariés : ...` | `delegate` = un humain ou une clé fausse | `delegate` = **clé d'un salarié IA** (`glm`), pas un humain |
+| `Aucun canal résolu : précise channel` | pas de projet courant (`ONBOARD.md`) | passe `channel`, ou lance `setup_project` |
+| `get_inbox` renvoie `skippedChannels` (`not_in_channel`) | ton bot n'est pas membre du canal | `/invite` le bot dans le canal (auto pour les canaux créés par `setup_project`) |
+| Mention `@X` non cliquable dans Slack | `X` n'est pas une clé de l'annuaire | utilise une clé exacte (`@romain`, `@glm`) |
+| Issue introuvable `EAT-XX` | mauvais identifiant / autre team | vérifie l'identifiant (`EAT-<n>`) |
+
+## Ce que cette skill ne couvre pas
+
+- **`setup_project`** (bootstrap projet Linear + canal + `ONBOARD.md`) → `erom-onboarding`.
+- Les **workflows** de plus haut niveau (`inbox`, `handoff`) s'appuient sur ces tools ; cette skill en est la référence sous-jacente.

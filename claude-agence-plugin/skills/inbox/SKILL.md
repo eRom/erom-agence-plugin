@@ -1,100 +1,62 @@
 ---
 name: inbox
-description: "Vue agrégée de ce qui demande attention sur le projet eRom courant : les issues Linear actives du projet + l'inbox Slack du canal projet. Lit l'identité projet (Linear Project ID + Channel Slack ID) depuis le fichier '_memory_/ONBOARD.md'. Déclenche dès que l'utilisateur veut faire le point sur le projet : 'inbox', 'ma boîte', 'quoi de neuf sur le projet', 'qu'est-ce qui m'attend', 'les issues en cours', 'où on en est', 'check le projet', 'messages en attente'."
+description: "Vue « boîte de réception » du projet eRom courant via le MCP Caserne : les issues Linear actives du projet + tes derniers messages Slack mentionnés. Un seul tool (`inbox`) fait tout : résolution du projet courant, tri, mentions, garde-fous. Déclenche dès que l'utilisateur veut faire le point : 'inbox', 'ma boîte', 'quoi de neuf sur le projet', 'qu'est-ce qui m'attend', 'les issues en cours', 'où on en est', 'check le projet', 'messages en attente'."
 user-invocable: true
 agent: caserne-mailbox
 ---
 
 # inbox
 
-Vue « boîte de réception » du **projet courant** : ce qui bouge côté Linear (issues actives) et côté Slack (canal du projet). Lecture seule - on consulte, on ne modifie rien.
+Vue d'ensemble du **projet courant**, en **lecture seule** : les issues actives côté Linear et tes derniers messages mentionnés côté Slack. On consulte, on ne modifie rien.
 
-## Étape 0 - Identité du projet (obligatoire)
+Tout est fait par un seul tool du MCP Caserne : **`inbox`**. Il résout le projet courant (`_memory_/ONBOARD.md`), trie les issues, récupère tes mentions et gère les garde-fous. Cette skill ne fait qu'appeler et présenter.
 
-L'identité du projet est servie par le fichier `_memory_/ONBOARD.md`. Récupère-y deux valeurs dans le tableau :
+> `inbox` = vue projet. À ne pas confondre avec `get_inbox` = ta file de triage perso (issues déléguées à toi + mentions non traitées). Ici on veut l'**état du projet**.
 
-| Champ | Ligne du tableau |
-|---|---|
-| Linear Project ID | `| Linear Project | <uuid> (team EAT) |` |
-| Channel Slack ID | `| Slack | #<slug> (<Cxxxx>) |` |
+## 1. Appeler le tool
 
-**Garde-fou** : si pas de fichier `_memory_/ONBOARD.md`, arrête-toi et dis-le clairement :
+```
+inbox({ limit? })        // limit = nb de mentions à remonter (défaut 5)
+→ { project, issues, mentions, skippedChannels }
+```
+
+- `issues` : toutes les issues actives du projet (hors `Done/Canceled/Duplicate`), **déjà triées** par avancement (`Implementation` → `Specification` → `Todo` → `Backlog`). Chaque item : `{ identifier, title, state, url }`.
+- `mentions` : tes derniers messages te mentionnant, du plus récent au plus ancien. Chaque item : `{ author, text, ts, handled }` (`handled: true` = déjà réagi ✅).
+- `skippedChannels` : canaux Slack où ton bot n'est pas membre (non fatals).
+
+**Garde-fou** : si le tool renvoie une erreur « aucun projet courant », relaie-la telle quelle et arrête-toi :
 ```
 Pas d'identité projet - inbox indisponible.
-Lance /onboarding pour (re)générer _memory_/ONBOARD.md.
-```
-Le Channel Slack ID, lui, est optionnel : s'il manque, fais la partie Linear et signale juste que le canal Slack n'est pas configuré.
-
-## Étape 1 - Issues Linear du projet
-
-**Toutes** les issues du projet (pas seulement celles de l'agent courant).
-
-```
-<MCP Linear>.list_issues({
-  project: <PROJET_LINEAR_ID>,
-  includeArchived: false,
-  limit: 100
-})
+Lance /onboarding (setup_project) pour générer _memory_/ONBOARD.md.
 ```
 
-Puis, côté skill :
-- **Exclure** les issues terminées : statuts `Done`, `Canceled`, `Duplicate`.
-- **Trier** par statut dans cet ordre (du plus avancé au moins avancé) :
-  1. Implementation
-  2. Specification
-  3. Todo
-  4. Backlog
+## 2. Présenter
 
-  (référentiel des statuts : section `## Linear` de CASERNE.md)
-
-Affiche un tableau :
+Un bloc unique, Linear puis Slack.
 
 ```
-| ID      | Title                          | Status         |
-|---------|--------------------------------|----------------|
-| EAT-142 | Refacto pipeline ingestion     | Implementation |
-| EAT-138 | Spec connecteur OAuth          | Specification  |
-| EAT-151 | Bug dédup chunks               | Todo           |
+=== Inbox <project> ===
+
+📋 Issues actives (<n>)
+| ID      | Title                      | Status         |
+|---------|----------------------------|----------------|
+| EAT-142 | Refacto pipeline ingestion | Implementation |
+| EAT-138 | Spec connecteur OAuth      | Specification  |
+| EAT-151 | Bug dédup chunks           | Todo           |
+
+💬 Mentions (<n>)
+- Romain : « @toi tu peux regarder EAT-151 ? »   ✅ traité
+- Romain : « ping sur le déploiement »
 ```
 
-Aucune issue active → `Aucune issue active sur ce projet.`
-
-## Étape 2 - Inbox Slack du projet
-
-L'inbox = les messages qui **mentionnent l'agent courant** (`<@Uxxxx>`) et qui ne sont **pas encore traités** (sans réaction ✅ / ☑️). C'est une liste « à traiter », pas l'historique du canal.
-
-Si un Channel Slack ID a été trouvé :
-
-```
-<MCP Slack>.slack_get_inbox({
-  user_id:    <Slack ID de l'agent courant>,  // fourni par le hook (bloc <caserne-self>)
-  channel_id: <CHANNEL_SLACK_ID>,             // restreint au canal du projet
-  limit:      50
-})
-```
-
-`user_id` = l'agent qui exécute la skill. Son Slack ID est servi au démarrage dans le bloc `<caserne-self>` (la ligne de l'agent courant dans la table `## Agents` de CASERNE.md, colonne « Slack ID »). À défaut, lis-le directement dans cette table.
-
-Pas de canal configuré → `Pas de canal Slack configuré pour ce projet.` (on n'omet pas `channel_id` pour scanner tout le workspace : on veut rester cadré sur le projet).
-
-Affiche les messages remontés (auteur, extrait, âge). Aucun → `Inbox Slack vide (rien à traiter).`
-
-## Affichage final
-
-Un bloc unique, Linear puis Slack :
-
-```
-=== Inbox <nom du projet> ===
-
-📋 Issues actives (3)
-<tableau>
-
-💬 Slack (<n> en attente)
-<inbox ou note d'absence>
-```
+- Garde l'ordre renvoyé par le tool (ne re-trie pas).
+- Affiche toujours les identifiers `EAT-XXX`.
+- Marque les mentions déjà traitées (`handled: true`) discrètement (ex. `✅ traité`).
+- Aucune issue active → `Aucune issue active sur ce projet.`
+- Aucune mention → `Aucune mention récente.`
+- `skippedChannels` non vide → une ligne : `Canaux non lus (bot non invité) : <ids> - /invite pour les voir.`
 
 ## Contraintes
 
-- **Lecture seule.** Cette skill ne crée, ne modifie et ne ferme rien (ni issue, ni message).
-- Ne devine jamais le Projet Linear ID : sans lui, on s'arrête (étape 0).
-- Affiche toujours les identifiers `EAT-XXX`.
+- **Lecture seule.** Ne crée, ne modifie et ne ferme rien (ni issue, ni message, ni réaction).
+- Ne devine jamais le projet : sans projet courant, on s'arrête (le tool le signale).
