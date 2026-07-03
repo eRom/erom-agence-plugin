@@ -2,7 +2,6 @@
 name: inbox
 description: "Vue « boîte de réception » du projet eRom courant via le MCP Caserne : les issues Linear actives du projet + tes derniers messages Slack mentionnés. Un seul tool (`inbox`) fait tout : résolution du projet courant, tri, mentions, garde-fous. Déclenche dès que l'utilisateur veut faire le point : 'inbox', 'ma boîte', 'quoi de neuf sur le projet', 'qu'est-ce qui m'attend', 'les issues en cours', 'où on en est', 'check le projet', 'messages en attente'."
 user-invocable: true
-agent: caserne-mailbox
 ---
 
 # inbox
