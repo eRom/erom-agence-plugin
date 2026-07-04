@@ -29,10 +29,10 @@ Côté Claude, les tools s'appellent `mcp__caserne__<nom>` ; ici je les note `<n
 | Tool | À quoi ça sert | Défauts / notes clés |
 |------|----------------|----------------------|
 | `whoami` | Identité + projet courant + référentiel (statuts, labels, annuaire, canaux) | À appeler en début de session |
-| `create_issue` | Crée une issue sous ton identité + **annonce Slack auto** | projet courant ; `state` défaut `Backlog` ; `notify:false` coupe l'annonce |
+| `create_issue` | Crée une issue sous ton identité + **annonce Slack auto** | projet courant ; `state` défaut `Backlog` ; `workspace` = path disque (bloc form) ; `notify:false` coupe l'annonce |
 | `update_issue` | Modifie statut / labels / titre / description / délégué | `id` = `EAT-12` |
 | `comment_issue` | Commente une issue sous ton identité | — |
-| `get_issue` | Lit une issue + description + commentaires | — |
+| `get_issue` | Lit une issue + description + commentaires | expose aussi `workspace` (path disque, `null` si absent) |
 | `list_issues` | Liste les issues | projet courant ; `mine` = les tiennes, `active` = hors terminées ; `limit` défaut 50, max 100 |
 | `list_projects` | Liste les projets de la team | `query` = filtre sur le nom |
 | `post_message` | Poste dans Slack sous ton bot | canal projet → fallback `#caserne` ; `thread_ts` pour répondre |
@@ -55,10 +55,13 @@ create_issue({
   labels?: ["feature"],         // NOMS de labels
   delegate?: "glm",             // CLÉ d'un salarié IA
   project?: "mon-projet",       // NOM, défaut : projet courant
+  workspace?: "/Users/x/dev/y", // full path du projet sur le disque
   notify?: false                // coupe l'annonce Slack (défaut : annonce)
 })
 ```
 Crée l'issue **sous ton identité**, dans le projet courant, et **annonce dans le canal Slack projet** (`🎫 <toi> a créé EAT-XX : <titre>`). L'annonce est silencieusement sautée s'il n'y a pas de canal. Retour : `{ issue, notify }`.
+
+**`workspace`** = full path du projet sur le disque de l'humain. Linear n'a pas de custom fields : la valeur est rendue en tête de description au format `#### workspace\n\n<path>`, **identique** à ce que produit le form template Linear `caserne-issue-template`. Un humain qui remplit le form et le MCP écrivent donc le même bloc → `get_issue` le reparse et l'expose en `workspace` (voir plus bas), quel que soit le créateur.
 
 ### `update_issue`
 ```
@@ -71,6 +74,7 @@ update_issue({ id: "EAT-12", state?, labels?, title?, description?, delegate? })
 comment_issue({ id: "EAT-12", body: "..." })   // commente sous ton identité
 get_issue({ id: "EAT-12" })                     // issue + description + commentaires
 ```
+`get_issue` renvoie aussi **`workspace`** : le path disque extrait du bloc `#### workspace` de la description (`null` si absent). Fiable que l'issue vienne du form humain ou du MCP.
 
 ### `list_issues`
 ```

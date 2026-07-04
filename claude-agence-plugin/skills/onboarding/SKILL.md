@@ -1,6 +1,6 @@
 ---
-name: erom-onboarding
-description: "Bootstrap projet eRom — GitHub repo privé, Linear Project EAT, Slack canal privé, structure locale."
+name: onboarding
+description: "Bootstrap projet eRom — repo GitHub privé, cœur agence (projet Linear + canal Slack + ONBOARD.md) via le tool MCP setup_project, enregistrement RAG."
 user-invocable: true
 disable-model-invocation: true
 context: fork
@@ -9,135 +9,69 @@ agent: caserne-builder
 
 # Onboarding projet — écosystème eRom
 
-Orchestre l'init d'un nouveau projet (peu importe où il vit sur disque — `~/dev/`, `~/Documents/`, n'importe où) avec quatre cibles : **GitHub**, **Linear**, **Slack**, **structure locale**. Conçu pour être idempotent : on lookup d'abord, on ne crée que ce qui manque.
+Init d'un nouveau projet (peu importe où il vit sur disque). Le **cœur agence** — projet Linear + canal Slack privé + invitations + message d'accueil + `_memory_/ONBOARD.md` — est délégué à un seul tool MCP idempotent : **`setup_project`** (côté Caserne). Il ne reste que deux cibles à orchestrer ici : **GitHub** (repo privé) et **RAG** (vault cortex).
+
+Le référentiel d'agence (team Linear, statuts, labels, projets, canaux, annuaire) vit dans `~/.config/caserne/employees.yml` et est **résolu côté serveur**.
 
 ## Pré-requis
 
-- `gh` CLI authentifié sur le compte `eRom` (auth https, droits de création de repo sur l'org)
-- Un serveur MCP **Linear** actif et connecté au workspace eRom (team `EAT`)
-- Un serveur MCP **Slack** actif et connecté au workspace eRom
-- Pour l'étape RAG : un clone local du vault dans `~/.config/gerber-vault` (sinon l'étape se cloue/skip proprement)
-- `~/.config/caserne/CASERNE.md` doit exister **et être rempli** (IDs d'agence : team Linear, statuts, labels, channel). Pré-requis dur, non auto-généré : sans lui, l'**étape 0** bloque et rend la main. Les IDs sont injectés au démarrage (hook) ; à défaut `Read ~/.config/caserne/CASERNE.md`.
+- `gh` CLI authentifié sur le compte `eRom` (droits de création de repo sur l'org).
+- MCP **Caserne** connecté (`CASERNE_AGENT_ID` défini dans l'env). Sans lui, `setup_project` échoue : stoppe proprement et signale-le, ne bricole pas de fallback Linear/Slack.
+- Pour l'étape RAG : un clone local du vault dans `~/.config/gerber-vault` (sinon l'étape se skippe proprement, sans faire échouer le reste).
 
 ## Portabilité cross-agents
 
-Cette skill est conçue pour vivre dans Claude Code, Codex et Gemini CLI — chacun a sa propre convention de nommage pour les outils MCP (`mcp__plugin_linear_linear__list_projects` côté Claude, autre chose côté Codex/Gemini). Les appels d'outils sont donc décrits ici sous forme **logique** : `<MCP Linear>.list_projects`, `<MCP Slack>.create_channel`, etc. Charge à chaque agent de traduire vers le nom technique exact disponible dans son contexte. Si un outil logique n'a pas d'équivalent dans l'agent courant, stoppe et signale-le proprement plutôt que de bricoler.
+Cette skill vit dans Claude Code, Codex et Gemini CLI. Les tools MCP sont désignés sous forme **logique** : `<MCP Caserne>.setup_project`. Côté Claude, le nom technique est `mcp__caserne__setup_project` ; charge à chaque agent de traduire vers l'outil exact de son contexte. Si l'outil n'existe pas dans l'agent courant, stoppe et signale-le plutôt que de réimplémenter l'orchestration à la main.
 
-## Mode `--dry-run`
+## Slug du projet
 
-Si l'utilisateur dit "dry-run", "simulation", "sans rien créer", ou "à blanc" : déroule toute la logique de détection (lookups inclus) mais **n'appelle aucune API de création** ni n'écrit de fichier. Affiche à la place le résumé final avec `[DRY-RUN] would create:` devant chaque action qui aurait été exécutée.
+`setup_project` dérive le slug du `basename` du répertoire courant (NFD → suppression des diacritiques → lowercase → kebab-case), et c'est aussi le nom du repo GitHub. Pour garantir que **GitHub et Linear partagent exactement le même slug**, calcule-le une fois ici et passe-le en `name` à `setup_project`.
+
+**Ordre de priorité :**
+1. L'utilisateur a fourni un nom explicite ("onboard `barda-cli`") → normalise-le en kebab-case.
+2. Sinon → `basename "$(pwd)"` normalisé.
+
+Normalisation (même règle que le serveur) : NFD + retrait des accents (`é`→`e`, `ç`→`c`…), lowercase, tout caractère hors `[a-z0-9-]` → `-`, coalesce les `-`, trim. Aucune confirmation nécessaire (`Nouveau Projet` → `nouveau-projet`, `Mon Idée_v2` → `mon-idee-v2`).
 
 ## Workflow
 
-### 0. Pré-requis agence : `~/.config/caserne/CASERNE.md` (bloquant)
+### 1. GitHub (si absent)
 
-Toute la phase de découverte (étape 2) dépend des IDs d'agence lus dans ce fichier (team Linear, statuts, labels, channel Slack). Tu tournes forké (`caserne-builder`, pas de dialogue possible) : tu ne crées ni ne complètes jamais ce fichier toi-même, tu te contentes de vérifier, dans l'ordre :
-
-1. **Le fichier existe** — `~/.config/caserne/CASERNE.md`.
-2. **Il est rempli** — dans sa section `## Linear`, la ligne `- Team :` ne contient plus de placeholder `<...>`.
-
-Dès que l'une des deux vérifications échoue, **arrête-toi immédiatement** (aucun lookup, aucune écriture) et affiche :
-
-```
-~/.config/caserne/CASERNE.md non trouvé ou incomplet !
-Remplis-le avec les IDs de ton agence (team Linear, statuts, labels, projet Handoffs, channel Slack, comptes agents), puis relance /onboarding.
+Lookup :
+```bash
+gh repo view eRom/<slug> --json url,visibility,isPrivate 2>/dev/null
 ```
 
-Les deux vérifications passent → continue à l'étape 1.
-
-### 1. Déterminer le slug du projet
-
-**Source par défaut : `basename "$(pwd)"`.** Romain bosse depuis n'importe quel dossier (`~/dev/cruchot-cli/`, `~/Documents/Nouveau Projet/`, `~/tmp/xyz/`, etc.) — le slug se déduit toujours du nom du dossier courant, jamais du chemin parent.
-
-**Ordre de priorité :**
-
-1. **L'utilisateur a fourni un nom explicite** dans son message (ex: "onboard `mon-projet`", "init `barda-cli`") → applique la normalisation kebab-case ci-dessous et utilise-le.
-2. **Sinon** → prends `basename "$(pwd)"` et applique la normalisation. Le dossier ne change pas de nom entre deux runs, donc cette dérivation est stable et sert d'ancre d'idempotence implicite.
-
-#### Normalisation kebab-case
-
-Applique dans cet ordre :
-1. Décompose les accents (NFD) puis retire les diacritiques (`é`/`è`/`ê` → `e`, `ç` → `c`, `à` → `a`, `ô` → `o`, etc.).
-2. Passe tout en lowercase.
-3. Remplace `_`, espaces, et tout caractère non-`[a-z0-9-]` par `-`.
-4. Coalesce les `-` consécutifs en un seul, trim les `-` en début/fin.
-
-**Exemples :**
-
-| Basename brut | Slug normalisé |
-|---------------|----------------|
-| `cruchot-cli` | `cruchot-cli` (inchangé, pas de confirmation nécessaire) |
-| `Nouveau Projet` | `nouveau-projet` (pas de confirmation nécessaire) |
-| `Mon Idée_v2` | `mon-idee-v2` (pas de confirmation nécessaire) |
-| `API__keys  manager` | `api-keys-manager` (pas de confirmation nécessaire) |
-| `RéacteurNucléaire` | `reacteur-nucleaire` (pas de confirmation nécessaire) |
-
-### 1bis. Ancre d'idempotence : `_memory_/ONBOARD.md`
-
-Avant de lancer les lookups distants, **regarde si `_memory_/ONBOARD.md` existe dans le repo courant** :
-- **Oui** → parse le tableau pour récupérer les IDs déjà connus (Linear project ID, Slack channel ID). Tu peux toujours faire les lookups distants en parallèle pour confirmer qu'ils sont encore valides (un canal Slack peut avoir été archivé, un projet Linear renommé), mais ces IDs guident la phase de création : si tout est cohérent, aucune création.
-- **Non, mais un bloc `## ... Onboarding (eRom)` traîne dans `CLAUDE.md`** (projet onboardé avant la migration) → c'est un cas de **migration** : récupère les IDs de ce bloc, ils serviront à écrire `_memory_/ONBOARD.md` en étape 4 (le bloc legacy sera retiré de `CLAUDE.md` à ce moment-là).
-- **Ni l'un ni l'autre** → on part en mode discovery pur (lookups par nom uniquement).
-
-C'est `_memory_/ONBOARD.md` qui sert d'ancre d'idempotence durable (fichier dédié, neutre, agnostique), pas `CLAUDE.md`.
-
-### 2. Phase de découverte (lookup en parallèle)
-
-Lance ces lookups en parallèle (un seul message avec plusieurs tool calls) pour réduire la latence :
-
-| Cible | Appel | Critère "existe" |
-|-------|-------|------------------|
-| **GitHub** | `gh repo view eRom/<slug> --json url,visibility,isPrivate 2>/dev/null` | exit 0 |
-| **Linear** | `<MCP Linear>.list_projects` filtré sur la team d'agence (clé lue dans `## Linear` de CASERNE.md) | match exact (case-insensitive) sur `name` = `<slug>` |
-| **Slack** | `<MCP Slack>.list_channels` (ou `search_channels` si l'outil existe) avec query `<slug>` | match exact sur `name` |
-| **Local** | `test -f _memory_/ONBOARD.md` | présence du fichier d'identité projet |
-
-Garde les IDs trouvés dans un état mental clair avant la phase de création.
-
-### 3. Phase de création (parallèle quand possible)
-
-Pour chaque cible **manquante**, exécute :
-
-#### GitHub (si absent)
+Absent (exit ≠ 0) → crée :
 ```bash
 gh repo create eRom/<slug> --private --description "<slug>" --confirm
 ```
-Capture l'URL HTTPS. Le repo est créé vide — pas de `--clone` ici (le cwd est probablement déjà le dossier du projet).
+Repo créé vide, pas de `--clone` (le cwd est déjà le dossier du projet). Capture l'URL HTTPS.
 
 Si le dossier n'est pas encore un repo git :
 ```bash
 git init && git remote add origin git@github.com:eRom/<slug>.git
 ```
 
-#### Linear (si absent)
-Appelle `<MCP Linear>.save_project` (ou `create_project` selon l'outil exposé) avec :
-- `name`: `<slug>`
-- `team`: la team d'agence (clé/ID lus dans `## Linear` de CASERNE.md)
-- `state`: `backlog`
-- `description`: une ligne contextuelle si l'utilisateur l'a fournie
+### 2. Cœur agence — `setup_project`
 
-Capture l'`id` retourné.
+Un seul appel gère projet Linear, canal Slack privé, invitations de l'annuaire, message d'accueil et écriture de `_memory_/ONBOARD.md`. Il est idempotent : il ne crée que le manquant.
 
-#### Slack (si absent)
-
-**Chemin principal** — appelle `<MCP Slack>.slack_setup_project_channel` (un seul appel qui crée + invite + poste le message d'accueil) avec :
-- `name`: `<slug>`
-- `welcome_message`: `"Welcome to our new project ! 😎"`
-
-Capture le `channel_id` retourné (nécessaire pour `_memory_/ONBOARD.md`).
-
-**Fallback** — si l'outil `slack_setup_project_channel` n'existe pas dans l'agent courant **ou** s'il a échoué, déroule en deux appels :
-1. `<MCP Slack>.create_channel` avec `name: <slug>`, `is_private: true` → capture `channel_id`
-2. `<MCP Slack>.invite_to_channel` avec `channel_id` + liste des Slack IDs
-
-
-#### Structure locale (idempotent)
-```bash
-mkdir -p _memory_
+```
+<MCP Caserne>.setup_project({
+  name: "<slug>",            // même slug que le repo GitHub
+  description: "<contexte>"  // optionnel, une ligne si l'utilisateur l'a fournie
+})
 ```
 
+Retour à capturer pour le récap :
+```
+{ slug, linear: "created"|"reused", slack: "created"|"reused", invited, onboard: "written"|"kept" }
+```
 
-#### RAG (enregistrement dans le vault)
+Rien d'autre à faire pour Linear/Slack : pas de lookup préalable, pas de création manuelle, pas d'invitation à la main, pas d'écriture d'`ONBOARD.md`. Si l'appel échoue (MCP down, token invalide), signale précisément l'erreur remontée et n'invente pas de contournement.
+
+### 3. RAG (enregistrement dans le vault)
 
 Enregistre le projet dans le **vault cortex** pour qu'il soit cloné (cron) puis indexé (FileSearchStore Gemini). Le vault est un repo Git dont une copie locale vit dans `~/.config/gerber-vault` ; on opère directement sur ce clone (édition + commit + push), pas via l'API GitHub.
 
@@ -145,18 +79,13 @@ Enregistre le projet dans le **vault cortex** pour qu'il soit cloné (cron) puis
 - Clone local du vault : `~/.config/gerber-vault`
 - Registre : `sources.yml` (sous la clé `sources:`)
 - Repo enregistré : **`eRom/<slug>`**
-- Paths par défaut indexés :
-  ```yaml
-  - README.md
-  - docs/
-  - _memory_/
-  ```
+- Paths par défaut indexés : `README.md`, `docs/`, `_memory_/`
 
 **Étapes :**
 
 1. **Vérifier le clone.** Si `~/.config/gerber-vault` n'existe pas : tente `git clone https://github.com/eRom/gerber-vault.git ~/.config/gerber-vault`. Si le clone échoue (pas d'accès, offline), **n'échoue pas l'onboarding entier** : note `rag: SKIPPED (vault local indisponible)` et passe à la suite.
 
-2. **Synchroniser avant d'éditer** (le clone local est souvent en retard sur le distant) :
+2. **Synchroniser avant d'éditer** (le clone local est souvent en retard) :
    ```bash
    git -C ~/.config/gerber-vault pull --ff-only
    ```
@@ -166,9 +95,9 @@ Enregistre le projet dans le **vault cortex** pour qu'il soit cloné (cron) puis
    ```bash
    grep -qE "^[[:space:]]*-[[:space:]]*repo:[[:space:]]*eRom/<slug>[[:space:]]*$" ~/.config/gerber-vault/sources.yml
    ```
-   Si trouvée → aucune écriture, résumé `rag: OK (reused)`.
+   Si trouvée → aucune écriture, `rag: OK (reused)`.
 
-4. **Append du bloc** en fin de `sources.yml` (indentation 2 espaces, alignée sur les entrées existantes), avec la date du jour :
+4. **Append du bloc** en fin de `sources.yml` (indentation 2 espaces, alignée sur l'existant), avec la date du jour :
    ```yaml
      - repo: eRom/<slug>
        paths:
@@ -188,65 +117,39 @@ Enregistre le projet dans le **vault cortex** pour qu'il soit cloné (cron) puis
    Ajouté via la skill erom-onboarding."
    git -C ~/.config/gerber-vault push
    ```
-   Résumé : `rag: OK (created)`.
+   `rag: OK (created)`.
 
-**Mode `--dry-run`** : déroule pull + idempotence (lecture seule), mais n'écris pas dans `sources.yml` et ne commit/push pas. Affiche `[DRY-RUN] would register eRom/<slug> in vault sources.yml`.
+### 4. Résumé final
 
-
-### 4. Écriture de `_memory_/ONBOARD.md`
-
-Les IDs par-projet vivent dans un fichier dédié, neutre et agnostique (lu par tous les agents). Le dossier `_memory_/` a déjà été créé à l'étape 3.
-
-**Écris `_memory_/ONBOARD.md`** avec ce contenu, en remplaçant les `<placeholders>` par les valeurs fraîches :
-
-```markdown
-## <slug> - Onboarding (eRom)
-
-| Cible | Référence |
-|-------|-----------|
-| Linear Project | `<linear_project_id>` (team EAT) |
-| Slack | `#<slug>` (`<slack_channel_id>`) |
-```
-
-Le fichier **est** le bloc : pas de merge, pas de sections custom à préserver. Idempotence triviale → on (ré)écrit le fichier avec les valeurs courantes (si elles n'ont pas bougé, le contenu est identique).
-
-**Migration depuis `CLAUDE.md` (legacy).** Si `_memory_/ONBOARD.md` n'existait pas mais qu'un bloc `## ... Onboarding (eRom)` traîne dans `CLAUDE.md` (repéré en étape 1bis) :
-1. Écris `_memory_/ONBOARD.md` avec les valeurs (fraîches si lookups OK, sinon celles du bloc legacy).
-2. **Retire** la section `## ... Onboarding (eRom)` de `CLAUDE.md` (uniquement cette section ; ne touche à AUCUNE autre section custom que Romain aurait ajoutée).
-
-### 5. Résumé final
-
-Affiche un tableau récapitulatif dans ce format exact (cocher `OK` quand fait/existant, `SKIP` uniquement si une cible était indisponible, et indiquer `(reused)` ou `(created)` pour les actions effectives) :
+Affiche un tableau récapitulatif dans ce format (`(reused)`/`(created)` d'après les valeurs retournées par `setup_project` ; `SKIP` seulement si une cible était indisponible) :
 
 ```
 Onboarding <slug> :
 
-github     : OK (created)   → https://github.com/eRom/<slug>
-linear     : OK (reused)    → Project <linear_project_id>
-slack      : OK (created)   → #<slug> (<slack_channel_id>)
-structure  : OK             → _memory_/
-contexte   : OK (created)   → _memory_/ONBOARD.md
-rag-docs   : OK (created)   → eRom/<slug> ajouté à gerber-vault
+github    : OK (created)   → https://github.com/eRom/<slug>
+linear    : OK (reused)    → projet <slug> (team EAT)
+slack     : OK (created)   → #<slug> (invités : <n>)
+onboard   : OK (written)   → _memory_/ONBOARD.md
+rag-docs  : OK (created)   → eRom/<slug> ajouté à gerber-vault
 ```
 
-En mode `--dry-run`, préfixe chaque ligne par `[DRY-RUN]` et précise `would create` / `would reuse` / `would merge`.
+Les lignes `linear`, `slack` et `onboard` reprennent directement le retour de `setup_project` (`linear`, `slack`, `invited`, `onboard`).
 
 ## Comportement attendu sur ré-exécution
 
-Si Romain relance la skill sur un projet déjà onboardé :
-- Tous les lookups doivent trouver les ressources existantes.
-- Aucune création n'est tentée.
-- `_memory_/ONBOARD.md` est (ré)écrit avec les valeurs courantes (contenu identique si rien n'a bougé). Un éventuel bloc legacy encore présent dans `CLAUDE.md` est retiré (migration one-shot).
-- Résumé final affiche `OK (reused)` partout, sans bruit.
+Relancer la skill sur un projet déjà onboardé est sûr :
+- GitHub : le lookup trouve le repo, aucune création.
+- `setup_project` : tout revient `reused`/`kept`, aucun second message d'accueil.
+- RAG : l'entrée `sources.yml` existe déjà → `reused`.
 
-C'est le test de non-régression à garder en tête.
+Le récap affiche `reused`/`kept` partout, sans bruit. C'est le test de non-régression.
 
 ## Gestion des erreurs
 
-- **gh non authentifié** → demande à Romain de lancer `gh auth login` et stoppe net. Ne tente pas de fallback.
-- **MCP linear/slack indisponible** → indique précisément quelle MCP est down, propose à Romain de relancer Claude Code avec la MCP active, mais **continue les autres cibles** (l'idempotence repassera dessus à la prochaine exec).
-- **Collision de nom** (ex: repo GitHub existe sur un autre owner) → arrête et demande clarification, ne crée pas en silence sous un nom modifié.
+- **gh non authentifié** → demande `gh auth login` et stoppe net, pas de fallback.
+- **MCP Caserne indisponible** → `setup_project` échoue : indique-le clairement, propose de relancer avec le MCP actif. GitHub et RAG peuvent avoir été faits ; l'idempotence repassera dessus au prochain run.
+- **Collision de nom** (repo GitHub existe sur un autre owner) → arrête et demande clarification, ne crée pas en silence sous un nom modifié.
 
 ## Pourquoi cette skill existe
 
-Romain crée régulièrement de nouveaux projets eRom et le setup à la main (4 plateformes + fichiers locaux) est répétitif et facile à oublier. L'idempotence permet de relancer sans peur si une étape a foiré la première fois, et le fichier dédié `_memory_/ONBOARD.md` (neutre, agnostique) découple l'identité projet du fichier mémoire spécifique à chaque agent. Le tableau récap final est la signature visible que tout est aligné.
+Créer un projet eRom câble plusieurs plateformes ; le faire à la main est répétitif et facile à oublier. Depuis le control plane Caserne, tout le cœur agence est encapsulé dans le tool idempotent `setup_project` (référentiel résolu côté serveur via `employees.yml`), et la skill n'orchestre plus que ce qui vit hors de Caserne : le repo GitHub et l'indexation RAG. L'idempotence permet de relancer sans peur, et le récap final est la signature visible que tout est aligné.
