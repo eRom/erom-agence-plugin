@@ -21,7 +21,7 @@ Le référentiel d'agence (team Linear, statuts, labels, projets, canaux, annuai
 
 ## Portabilité cross-agents
 
-Cette skill vit dans Claude Code, Codex et Gemini CLI. Les tools MCP sont désignés sous forme **logique** : `<MCP Caserne>.setup_project`. Côté Claude, le nom technique est `mcp__caserne__setup_project` ; charge à chaque agent de traduire vers l'outil exact de son contexte. Si l'outil n'existe pas dans l'agent courant, stoppe et signale-le plutôt que de réimplémenter l'orchestration à la main.
+Skill partagée Claude Code / Codex / Gemini CLI : les tools MCP sont notés sous forme logique (`<MCP Caserne>.setup_project` = `mcp__caserne__setup_project` côté Claude). Outil absent dans l'agent courant → stoppe et signale-le, ne réimplémente pas l'orchestration à la main.
 
 ## Slug du projet
 
@@ -137,19 +137,10 @@ Les lignes `linear`, `slack` et `onboard` reprennent directement le retour de `s
 
 ## Comportement attendu sur ré-exécution
 
-Relancer la skill sur un projet déjà onboardé est sûr :
-- GitHub : le lookup trouve le repo, aucune création.
-- `setup_project` : tout revient `reused`/`kept`, aucun second message d'accueil.
-- RAG : l'entrée `sources.yml` existe déjà → `reused`.
-
-Le récap affiche `reused`/`kept` partout, sans bruit. C'est le test de non-régression.
+Relancer sur un projet déjà onboardé est sûr : chaque cible est idempotente et le récap affiche `reused`/`kept` partout, sans doublon ni second message d'accueil. C'est le test de non-régression.
 
 ## Gestion des erreurs
 
 - **gh non authentifié** → demande `gh auth login` et stoppe net, pas de fallback.
 - **MCP Caserne indisponible** → `setup_project` échoue : indique-le clairement, propose de relancer avec le MCP actif. GitHub et RAG peuvent avoir été faits ; l'idempotence repassera dessus au prochain run.
 - **Collision de nom** (repo GitHub existe sur un autre owner) → arrête et demande clarification, ne crée pas en silence sous un nom modifié.
-
-## Pourquoi cette skill existe
-
-Créer un projet eRom câble plusieurs plateformes ; le faire à la main est répétitif et facile à oublier. Depuis le control plane Caserne, tout le cœur agence est encapsulé dans le tool idempotent `setup_project` (référentiel résolu côté serveur via `employees.yml`), et la skill n'orchestre plus que ce qui vit hors de Caserne : le repo GitHub et l'indexation RAG. L'idempotence permet de relancer sans peur, et le récap final est la signature visible que tout est aligné.
