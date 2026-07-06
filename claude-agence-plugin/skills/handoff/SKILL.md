@@ -24,16 +24,7 @@ Les IDs d'agence vivent dans `CASERNE.md`, le référentiel injecté au démarra
 
 Toutes les opérations passent par le connecteur Linear, noté `<MCP Linear>.<tool>` (forme logique pour rester portable Claude/Codex/Gemini). Pas de MCP Linear local, pas de plugin.
 
-## Résolution de l'intention
-
-| Intention | Action | Tool |
-|---|---|---|
-| « commence un transfert », « save ça », « passe la main » | Créer | `save_issue` |
-| « liste mes transferts », « mes handoffs » | Lister | `list_issues` |
-| « prends/reprends/charge le transfert X » | Reprendre | `get_issue` (ou `list_issues` par titre) |
-| « libère/done le transfert X » | Libérer | `save_issue` (state → Done) |
-
-Ambiguïté → question fermée, ne devine pas.
+Quatre actions : **Créer**, **Lister**, **Reprendre**, **Libérer** (détaillées ci-dessous). Intention ambiguë → question fermée, ne devine pas.
 
 ## Quoi mettre dans un handoff
 
@@ -52,16 +43,8 @@ Ce qu'on ne met **pas** : le transcript, les détours, le contexte que la procha
 
 1. Titre court (3-6 mots), sans ponctuation finale.
 2. Rédige le contenu selon « Quoi mettre dans un handoff » ci-dessus.
-3. Confirme le draft avant d'écrire :
-   ```
-   --- Transfert ---
-   Titre : <title>
-
-   <content>
-   -----------------
-   Créer ? (o/n)
-   ```
-4. Sur `o` :
+3. Montre le draft complet (titre + contenu) et demande confirmation avant d'écrire.
+4. Confirmé :
    ```
    <MCP Linear>.save_issue({
      team:    <ID team d'agence>,    // résolu depuis CASERNE.md
@@ -104,13 +87,7 @@ Vide : `=== Transferts (0 Todo) ===\nRien en attente.`
   - Match unique → l'utiliser.
   - Plusieurs → afficher et demander lequel.
 
-Affichage :
-```
-=== [EAT-XXX] <title> ===
-<description>
-
-→ Prochaine action : <reformulation concise en ≤2 phrases>
-```
+Affiche la description complète, puis reformule la **prochaine action** en ≤2 phrases.
 
 Ne ferme **pas** automatiquement. Si l'utilisateur dit « c'est bon, je reprends », propose de libérer.
 
