@@ -1,13 +1,24 @@
 ---
 name: session-continue
-description: "Reprise de session après /clear : charge le dernier snapshot _sessions_/ (eager : Objectif + NEXT STEP ; lazy : le reste), restaure le contexte git, et annonce où on reprend. Déclenchement explicite (/session-continue)."
+description: "Reprise de session après /clear ou coupure quota : détecte le marqueur session limit, charge le dernier snapshot _sessions_/ (eager : Objectif + NEXT STEP ; lazy : le reste) ou l'état TaskList, restaure le contexte git, et annonce où on reprend. Déclenchement explicite (/session-continue)."
 user-invocable: true
 disable-model-invocation: true
 ---
 
 # session-continue
 
-Reprend le travail après un `/clear` sans relire toute la session. Le but est une reprise **légère** : tu ne charges que le minimum, le reste à la demande.
+Reprend le travail après un `/clear` ou une coupure quota, sans relire toute la session. Le but est une reprise **légère** : tu ne charges que le minimum, le reste à la demande.
+
+## 0. Détecter une coupure quota
+
+Vérifie si la session précédente s'est terminée en coupure (et non sur un checkpoint volontaire) :
+
+```bash
+DIR="$HOME/.claude/projects/$(pwd | sed 's#[/.]#-#g')"
+tail -c 4000 "$(ls -t "$DIR"/*.jsonl 2>/dev/null | head -1)" | grep -q "hit your session limit" && echo COUPURE
+```
+
+En mode coupure : ne relis **pas** le transcript entier (gonflé, cache froid - c'est la confusion de reprise documentée par l'audit). Repars de **TaskList** (l'état ancré au fil de l'eau pendant la tâche) plus les tout derniers tours du transcript pour la micro-position. Un snapshot `_sessions_/` peut exister mais dater du dernier checkpoint volontaire, bien avant la coupure : compare sa date au transcript et signale l'écart au lieu de le suivre aveuglément. Poursuis ensuite en 1→4 avec cette réserve.
 
 ## 1. Localiser le snapshot
 
