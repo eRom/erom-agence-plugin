@@ -11,6 +11,10 @@ Prépare un `/clear` propre sans perdre le fil : tu produis un jeton de reprise.
 
 Exécuté dans le **contexte principal** (tu as besoin du contexte de session pour le handoff). Suis les étapes dans l'ordre.
 
+## Limite structurelle (et son filet)
+
+Ce checkpoint est un geste **volontaire** : il ne protège pas d'une coupure quota, qui EST l'échec de l'appel API (aucun tour ne s'exécute pour écrire quoi que ce soit). Le filet pour ce scénario se pose en amont : pendant toute tâche longue, ancre l'état au fil de l'eau dans **TaskCreate/TaskUpdate** (statut et prochaine action à jour à chaque jalon). Cet état survit à la coupure, et `session-continue` sait repartir de là même sans snapshot.
+
 ## 1. Gitignore (si repo)
 
 Si le cwd est un repo git (`git rev-parse --is-inside-work-tree`) et que `_sessions_/` n'est pas déjà ignoré : ajoute la ligne `_sessions_/` au `.gitignore`. **Avant** le commit, pour qu'elle soit committée.
