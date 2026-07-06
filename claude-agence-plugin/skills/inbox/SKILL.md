@@ -48,11 +48,8 @@ Un bloc unique, Linear puis Slack.
 - Romain : « ping sur le déploiement »
 ```
 
-- Garde l'ordre renvoyé par le tool (ne re-trie pas).
-- Affiche toujours les identifiers `EAT-XXX`.
-- Marque les mentions déjà traitées (`handled: true`) discrètement (ex. `✅ traité`).
-- Aucune issue active → `Aucune issue active sur ce projet.`
-- Aucune mention → `Aucune mention récente.`
+- Garde l'ordre renvoyé par le tool (ne re-trie pas) ; le reste du rendu suit le gabarit.
+- Volet vide → une ligne explicite (`Aucune issue active sur ce projet.` / `Aucune mention récente.`).
 - `skippedChannels` non vide → une ligne : `Canaux non lus (bot non invité) : <ids> - /invite pour les voir.`
 
 ## Contraintes
