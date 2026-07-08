@@ -2,7 +2,15 @@
 import { redact, type Tier } from "./redact-rules.ts";
 import { currentTiers } from "./redact-state.ts";
 
-const TARGET_TOOLS = new Set(["Bash", "Read", "Grep"]);
+// Sorties susceptibles de véhiculer un secret : shell, fichiers, recherche, web, retours
+// d'agent, ET tous les tools MCP (mcp__* — get_mail/read_thread peuvent porter des tokens).
+function shouldRedact(tool: string): boolean {
+  return (
+    tool === "Bash" || tool === "Read" || tool === "Grep" ||
+    tool === "WebFetch" || tool === "Agent" || tool === "Task" ||
+    tool.startsWith("mcp__")
+  );
+}
 
 const raw = await Bun.stdin.text();
 
@@ -13,7 +21,7 @@ try {
   process.exit(0);
 }
 
-if (!input.tool_name || !TARGET_TOOLS.has(input.tool_name)) process.exit(0);
+if (!input.tool_name || !shouldRedact(input.tool_name)) process.exit(0);
 
 // tool_response est généralement un OBJET ({ stdout, stderr, ... } pour Bash,
 // { file: { content, ... } } pour Read). On rédige récursivement toutes les

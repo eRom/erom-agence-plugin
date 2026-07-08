@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { redact } from "./redact-rules.ts";
+import { redact, matchedRules } from "./redact-rules.ts";
 
 test("rédige une clé Anthropic", () => {
   const key = "sk-ant-api03-" + "a".repeat(95);
@@ -101,4 +101,50 @@ test("email : masqué par display, PAS par mandatory seul", () => {
 test("chemin perso : username masqué par display, PAS par mandatory seul", () => {
   expect(redact("/Users/recarnot/dev/app", ["mandatory"]).count).toBe(0);
   expect(redact("/Users/recarnot/dev/app", ["mandatory", "display"]).text).toBe("/Users/[REDACTED:user]/dev/app");
+});
+
+// --- Ajouts anti-secret (rétro 2026-07) ---
+
+test("rédige une clé API Linear (lin_api_ + 40)", () => {
+  const key = "lin" + "_api_" + "a".repeat(40);
+  expect(redact(key, ["mandatory"]).text).toBe("[REDACTED:linear_api_key]");
+});
+
+test("rédige le token de config d'app Slack xoxe.xoxp- (le point ne fuit plus)", () => {
+  const key = "xox" + "e.xoxp-" + "A".repeat(24);
+  const { text } = redact(`slack: ${key}`, ["mandatory"]);
+  expect(text).toBe("slack: [REDACTED:slack_token]");
+  expect(text).not.toContain("xoxe.");
+});
+
+test("env_secret conserve les guillemets autour du placeholder", () => {
+  expect(redact('KEY="abcdef0123456789"', ["mandatory"]).text).toBe('KEY="[REDACTED:env_secret]"');
+  // sans guillemets : comportement inchangé
+  expect(redact("API_TOKEN=abcdef0123456789", ["mandatory"]).text).toBe("API_TOKEN=[REDACTED:env_secret]");
+});
+
+test("phone : motif 3-3-4 NON masqué en mandatory (bascule display)", () => {
+  expect(redact("150 300 2026", ["mandatory"]).count).toBe(0);
+  expect(redact("512 512 4096", ["mandatory"]).count).toBe(0);
+  expect(redact("061 234 5678", ["mandatory", "display"]).text).toBe("[REDACTED:phone]");
+});
+
+test("labeled_secret : tier prompt uniquement, jamais mandatory", () => {
+  expect(redact("passe: motdepasse123", ["mandatory"]).count).toBe(0);
+  expect(redact("passe: motdepasse123", ["prompt"]).text).toBe("passe: [REDACTED:labeled_secret]");
+  expect(redact("client_secret=abcdef012345", ["prompt"]).text).toBe("client_secret=[REDACTED:labeled_secret]");
+});
+
+test("labeled_secret : pas de faux positif sur une valeur trop courte ou du code", () => {
+  expect(redact("token: str", ["prompt"]).count).toBe(0); // 3 chars < 8
+  expect(redact("access_token: process.env.FOO", ["prompt"]).count).toBe(0); // ponctuation de code
+});
+
+test("matchedRules : retourne les noms sans transformer, filtré par tier", () => {
+  const slack = "xox" + "b-1234567890-1234567890-" + "A".repeat(24);
+  expect(matchedRules(`voici ${slack}`, ["mandatory", "prompt"])).toContain("slack_token");
+  expect(matchedRules("passe: motdepasse123", ["mandatory", "prompt"])).toContain("labeled_secret");
+  expect(matchedRules("passe: motdepasse123", ["mandatory"])).toEqual([]); // labeled_secret est tier prompt
+  expect(matchedRules("texte normal sans secret", ["mandatory", "prompt"])).toEqual([]);
+  expect(matchedRules("serveur 192.168.1.1", ["mandatory", "prompt"])).toEqual([]); // ipv4 = display, exclu
 });

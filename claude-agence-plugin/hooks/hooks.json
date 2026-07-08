@@ -13,11 +13,21 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash|Read|Grep",
+        "matcher": "Bash|Read|Grep|WebFetch|Agent|Task|mcp__.*",
         "hooks": [
           {
             "type": "command",
             "command": "bun \"$CLAUDE_PLUGIN_ROOT/hooks/redact-context.ts\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PLUGIN_ROOT/hooks/redact-prompt-guard.ts\""
           }
         ]
       }
