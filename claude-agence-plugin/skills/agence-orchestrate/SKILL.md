@@ -26,7 +26,7 @@ Utilisée seulement quand le salarié n'est pas nommé :
 |---|---|---|
 | Deep research, veille, état de l'art | `agy` | Grounding Google natif, quota Antigravity |
 
-Salarié nommé explicitement (« délègue à glm ») → la table est court-circuitée, même protocole.
+Salarié nommé explicitement (« délègue à glm ») → la table est court-circuitée, même protocole. **Exception : la génération d'images reste hors v1 même pour un salarié nommé** (capacité d'agy en pane non vérifiée, cf. « Ce que ce skill ne couvre pas »).
 
 ## Le protocole de dispatch (5 temps)
 
@@ -41,7 +41,7 @@ caserne run agy -s agence --detach     # seulement si absent ou dead
 
 ### 2. Formule l'objective (gabarit)
 
-Un objective structuré, en **une seule ligne** (l'injection dans le pane est mono-ligne) :
+Un objective structuré, gardé **sur une seule ligne** de préférence (l'injection dans le pane aplatit de toute façon les retours à la ligne en ` ⏎ `, mais un objective mono-ligne reste plus lisible) :
 
 ```
 <mission en une phrase>. Contexte : <ce qu'il faut savoir>. Écris tes livrables dans <ABS>/.claude/agence/out/<ton task_id>/ (crée le dossier). Quand c'est fini, réponds par : caserne send boss response <task_id> success|failure <résumé + chemins des fichiers>.
@@ -116,4 +116,4 @@ ls /abs/du/projet/.claude/agence/out/task-ab12/ # vérifie le livrable, puis syn
 - **Le salarié dans son pane** (recruter, répondre à une task, `team` / `fire` / `clean`) → `agence-network`.
 - **L'identité et le travail dans l'agence** (Linear, Slack, mail) → `agence-control`.
 - **Le choix des moyens locaux de fallback** : configuration de la session hôte, hors plugin.
-- **Le volet images** (génération / édition → agy) : attend une vérification réelle d'agy en pane ; le jour venu, c'est une ligne de plus à la table de routage.
+- **Le volet images** (génération / édition → agy) : hors v1 **y compris sur demande nommée**, tant que la capacité d'agy à générer des images dans son pane n'est pas vérifiée sur un cas réel. Le jour venu, c'est une ligne de plus à la table de routage.
