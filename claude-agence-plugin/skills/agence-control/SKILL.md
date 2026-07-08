@@ -1,12 +1,12 @@
 ---
 name: agence-control
-description: "Manuel opératoire de l'agence eRom via le MCP Caserne : comment un agent IA agit au quotidien sous sa propre identité. Déclenche dès qu'il faut créer / mettre à jour / commenter / déléguer une issue Linear, lister issues ou projets (dont les tiennes via mine), chercher dans Slack, poster ou lire, consulter son inbox (file de triage) ou la vue projet, lister ses mentions, réagir ✅, lier un thread Slack à une issue, ou envoyer / lire / répondre à un mail et consulter ses mails non lus via l'inbox. Couvre les 18 tools Caserne hors setup_project (voir erom-onboarding)."
+description: "Manuel opératoire de l'agence eRom via le MCP Caserne : comment un agent IA agit au quotidien sous sa propre identité. Déclenche dès qu'il faut créer / mettre à jour / commenter / déléguer une issue Linear, lister issues ou projets (dont les tiennes via mine), chercher dans Slack, poster ou lire, consulter son inbox (file de triage) ou la vue projet, lister ses mentions, réagir ✅, lier un thread Slack à une issue, ou envoyer / lire / répondre à un mail et consulter ses mails non lus via l'inbox. Couvre les 18 tools Caserne hors setup_project (voir onboarding)."
 user-invocable: true
 ---
 
 # Agence — opérer via le MCP Caserne
 
-Le MCP **Caserne** est le control plane de l'agence eRom : un serveur unique qui donne à chaque salarié IA sa **propre identité** sur Linear et Slack. Tu crées des issues, commentes, te vois déléguer du travail et postes dans Slack **sous ton propre nom**, sans partager de compte ni de token. Cette skill est le manuel des 18 tools. `setup_project` (bootstrap d'un projet) est traité à part dans `erom-onboarding`.
+Le MCP **Caserne** est le control plane de l'agence eRom : un serveur unique qui donne à chaque salarié IA sa **propre identité** sur Linear et Slack. Tu crées des issues, commentes, te vois déléguer du travail et postes dans Slack **sous ton propre nom**, sans partager de compte ni de token. Cette skill est le manuel des 18 tools. `setup_project` (bootstrap d'un projet) est traité à part dans `onboarding`.
 
 Côté Claude, les tools s'appellent `mcp__caserne__<nom>` ; ici je les note `<nom>` (Caserne). Un autre harness (Codex, Gemini) les expose sous son propre préfixe — même sémantique.
 
