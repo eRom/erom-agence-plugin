@@ -12,7 +12,7 @@ Tout passe par le CLI **`caserne`** — aucun MCP requis, donc ça marche pour n
 
 ## Les 4 principes non négociables
 
-1. **Ton adressage vient de l'env de ton pane, jamais d'un argument.** `CASERNE_ALIAS` (ton surnom dans la session) et `CASERNE_SESSION` sont posés par caserne quand il t'incarne. `send` / `read` s'en servent pour savoir qui tu es et où tu es. Hors pane swarm (terminal nu), pas de `CASERNE_ALIAS` → `send` refuse : la messagerie est **agent-à-agent**. Ton identité durable Linear / Slack / mail reste `CASERNE_AGENT_ID` (voir `agence-control`) — le surnom, lui, est jetable et local à la session.
+1. **Ton adressage vient de l'env de ton pane, jamais d'un argument.** `CASERNE_ALIAS` (ton surnom dans la session) et `CASERNE_SESSION` sont posés par caserne quand il t'incarne. `send` / `read` s'en servent pour savoir qui tu es et où tu es. Hors pane swarm (pas de `CASERNE_ALIAS` : session principale, terminal nu), l'expéditeur devient le siège externe **`boss`** — le poste de commandement hors swarm ; sa doctrine vit dans `agence-orchestrate`. Ton identité durable Linear / Slack / mail reste `CASERNE_AGENT_ID` (voir `agence-control`) — le surnom, lui, est jetable et local à la session.
 
 2. **Agents égaux, pas de lead.** Tout agent peut recruter, assigner, virer. Le rappel (nudge) d'une tâche en retard revient à **celui qui l'a assignée**. Aucune hiérarchie à respecter ni à annoncer.
 
@@ -53,7 +53,7 @@ Le nouvel agent boote puis reçoit un **bootstrap** injecté (qui il est, commen
 ```
 caserne send <alias> <task|response|context|chat> <args…> [--timeout <min>]
 ```
-Expéditeur = **toi** (`CASERNE_ALIAS`). Destinataire **inconnu** ou **mort** → erreur ; en cours de spawn (`spawning`) → **accepté** (le message attend son readiness).
+Expéditeur = **toi** (`CASERNE_ALIAS`). Destinataire **inconnu** ou **mort** → erreur ; en cours de spawn (`spawning`) → **accepté** (le message attend son readiness). Une task peut venir de **`boss`** (la session principale, hors pane) : tu la clos exactement pareil — `caserne send boss response <task_id> …`. `boss` est toujours joignable même s'il n'apparaît jamais dans `team`.
 
 **Les 4 verbes — et surtout `task` vs `chat`, la distinction qui compte :**
 
@@ -133,7 +133,6 @@ caserne fire graphiste                         // libère le pane (réversible)
 
 | Erreur | Cause | Correction |
 |---|---|---|
-| `Expéditeur inconnu : CASERNE_ALIAS absent` | `send` lancé hors pane swarm | lance depuis un pane incarné (`caserne run … -s`) |
 | `Agent inconnu dans « <session> » : <alias>` | alias faux ou mauvaise session | `caserne team` pour les alias vivants ; précise `-s` |
 | `Agent inactif : <alias>` | destinataire `dead` | recrute-le à nouveau (`caserne run`) ou vise un autre |
 | `--timeout n'a de sens que pour une task` | `--timeout` sur chat / response / context | garde `--timeout` pour `task` uniquement |
@@ -142,6 +141,7 @@ caserne fire graphiste                         // libère le pane (réversible)
 
 ## Ce que cette skill ne couvre pas
 
+- **L'orchestration depuis la session principale** (siège `boss` : dispatch, wait, synthèse) → `agence-orchestrate`.
 - **L'identité et le travail dans l'agence** (issues Linear, Slack, mail sous ton nom) → `agence-control`. Le swarm te fait *tourner en équipe* ; agence-control te fait *agir dans l'agence*.
 - **L'embauche** (`caserne agent add`) et l'**onboarding projet** (`setup_project`) → hors swarm.
 - **Phase 2** (recouvrement messagerie fichier ↔ Slack / Linear) : décision produit à l'usage, hors périmètre v1.
