@@ -60,7 +60,7 @@ create_issue({
 list_issues({ project: "Handoffs", state: "Todo" })
 ```
 
-« tous » → omettre `state` ; « les finis » → `state: "Done"`. Affichage compact, toujours avec l'identifier (`list_issues` ne renvoie pas de date : n'en invente pas) :
+« tous » → omettre `state` ; « les finis » → `state: "Done"`. Affichage compact, l'en-tête reflète le state réellement interrogé (`Todo`, `Done`, ou `tous`), toujours avec l'identifier (`list_issues` ne renvoie pas de date : n'en invente pas) :
 
 ```
 === Relays (3 Todo) ===
@@ -74,7 +74,7 @@ Vide : `=== Relays (0 Todo) ===` + `Rien en attente.`
 ## Reprendre
 
 - Identifier fourni → `get_issue({ id: "EAT-XXX" })`.
-- Sinon : `list_issues({ project: "Handoffs", query: <mots du titre>, limit: 5 })` pour résoudre l'identifier (ce résumé n'a pas de description) — match unique → l'utiliser ; plusieurs → montrer la liste (titres seuls) et demander lequel. Une fois l'identifier résolu, `get_issue({ id })` pour charger le payload complet.
+- Sinon : `list_issues({ project: "Handoffs", query: <mots du titre>, limit: 5 })` pour résoudre l'identifier (ce résumé n'a pas de description) — match unique → l'utiliser ; plusieurs → montrer la liste (titres seuls) et demander lequel. Une fois résolu, `get_issue({ id: "EAT-XXX" })` avec l'**identifier** (le champ `identifier` du résumé, pas son `id` interne) pour charger le payload complet.
 - Affiche le payload complet, puis reformule le **Next** en 2 phrases max.
 - **Pont pipeline** : si le skill `superpowers:brainstorming` est disponible dans ce harness et que l'intention est d'approfondir l'idée, propose d'enchaîner dessus avec le contenu du relay comme brief.
 - Ne libère jamais automatiquement à la reprise. L'utilisateur dit « c'est bon, je reprends » → propose de libérer.
