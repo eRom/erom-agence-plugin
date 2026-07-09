@@ -1,23 +1,9 @@
 {
   "mcpServers": {
-    "erom-slack-mcp": {
+    "caserne": {
       "type": "stdio",
-      "command": "bun",
-      "args": [
-        "run",
-        "${CASERNE_SLACK_MCP_SERVER}"
-      ],
-      "env": {
-        "SLACK_BOT_TOKEN": "${CODEX_SLACK_BOT_TOKEN}"
-      }
-    },
-    "cortex-mcp": {
-      "type": "stdio",
-      "command": "bun",
-      "args": [
-        "run",
-        "${CASERNE_VAULT_MCP_SERVER}"
-      ]
+      "command": "caserne-mcp",
+      "env": { "CASERNE_AGENT_ID": "${CASERNE_AGENT_ID}" }
     }
   }
 }
