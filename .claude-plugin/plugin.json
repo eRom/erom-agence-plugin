@@ -18,6 +18,8 @@
     "knowledge-base",
     "linear",
     "slack",
-    "rag"
+    "vault",
+    "network",
+    "teammates"
   ]
 }

@@ -5,9 +5,6 @@
 node_modules/
 dist/
 
-# Config Claude locale (la settings.json partagée reste versionnée)
-**/.claude/settings.local.json
-
 # Conception interne + outillage de mainteneur (non distribué au public)
 /docs/
 .claude/

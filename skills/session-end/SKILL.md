@@ -1,6 +1,6 @@
 ---
 name: session-end
-description: "Cartographie de fin de session : persiste _memory_/. Triggers : Fin de session, end session, au revoir, bonne nuit."
+description: "Cartographie de fin de session : persiste _memory_/. Triggers : Fin de session, end session, au revoir."
 user-invocable: true
 ---
 
