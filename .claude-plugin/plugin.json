@@ -15,11 +15,12 @@
     "mcp",
     "skills",
     "orchestration",
-    "knowledge-base",
     "linear",
     "slack",
     "vault",
     "network",
     "teammates"
-  ]
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
 }

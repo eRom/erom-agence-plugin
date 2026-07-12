@@ -76,7 +76,7 @@ caserne send raymond response task-ab12 success "favicon dans ./assets/favicon.p
 caserne send raymond chat "il me faut le schéma d'API avant de continuer"
 ```
 
-## Lire son inbox — `read`
+## Lire son agence inbox — `read`
 
 ```
 caserne read [--unread]
