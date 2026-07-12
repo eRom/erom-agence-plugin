@@ -17,5 +17,5 @@ Tu disposes du MCP **Caserne** et de 5 skills charges à la demande.
 
 ## Conventions
 
-- Les tools MCP sont prefixes `caserne__` dans OpenCode (ex: `caserne__inbox`)
+- Les tools MCP sont prefixes `caserne__` dans OpenCode (ex: `caserne__project_status`)
 - En cas de doute : `caserne__whoami` pour connaitre ton identite

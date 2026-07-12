@@ -7,6 +7,10 @@
   "license": "MIT",
   "repository": "https://github.com/eRom/erom-agence-plugin",
   "keywords": ["caserne", "cross-project", "orchestration", "skills", "mcp"],
+  "scripts": {
+    "sync:tools-manual": "bun scripts/sync-tools-manual.ts",
+    "check:tools-manual": "bun scripts/sync-tools-manual.ts --check"
+  },
   "pi": {
       "extensions": [
         "./.pi/extensions/caserne.ts"

@@ -6,7 +6,7 @@ user-invocable: true
 
 # Agence — opérer via le MCP Caserne
 
-Le MCP **Caserne** est le control plane de l'agence eRom : un serveur unique qui donne à chaque salarié IA sa **propre identité** sur Linear et Slack. Tu crées des issues, commentes, te vois déléguer du travail et postes dans Slack **sous ton propre nom**, sans partager de compte ni de token. Cette skill est le manuel des 18 tools. `setup_project` (bootstrap d'un projet) est traité à part dans `onboarding`.
+Le MCP **Caserne** est le control plane de l'agence eRom : un serveur unique qui donne à chaque salarié IA sa **propre identité** sur Linear et Slack. Tu crées des issues, commentes, te vois déléguer du travail et postes dans Slack **sous ton propre nom**, sans partager de compte ni de token. Cette skill est le manuel des 18 tools opératoires. Les schémas exacts (paramètres, types, requis) font foi dans `references/tools-manual.md`, **généré** depuis le code du control-plane (19 tools dont `setup_project`) et synchronisé via `bun scripts/sync-tools-manual.ts` — jamais édité à la main. `setup_project` (bootstrap d'un projet) est traité à part dans `onboarding`.
 
 Côté Claude, les tools s'appellent `mcp__caserne__<nom>` ; ici je les note `<nom>` (Caserne). Un autre harness (Codex, Gemini) les expose sous son propre préfixe — même sémantique.
 
@@ -222,6 +222,6 @@ add_reaction({ ts })                                // ✅ : mention traitée
 ## Ce que cette skill ne couvre pas
 
 - **`setup_project`** (bootstrap projet Linear + canal + `ONBOARD.md`) → `erom-onboarding`.
-- Les **workflows** de plus haut niveau (`inbox`, `handoff`) s'appuient sur ces tools ; cette skill en est la référence sous-jacente.
+- Les **workflows** de plus haut niveau (`agence-inbox`, `agence-relay`, `agence-orchestrate`) s'appuient sur ces tools ; cette skill en est la référence sous-jacente.
 - **Pas de `list_mails` ni de recherche dans les mails déjà lus** en v1 : seul le volet `mails` de `get_inbox` (non lus) est exposé. Un mail lu (`get_mail`) n'est plus consultable via les tools Caserne.
 - **Pièces jointes en mode HTTP distant (`caserne serve`)** : `save_attachments_to` écrit sur le disque **du serveur**, pas de celui de l'humain qui parle à `claude.ai`. Les paths renvoyés sont côté serveur.
